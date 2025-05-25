@@ -10,6 +10,9 @@ makemigrations:
 createsuperuser:
 	docker-compose exec $(WEB) python manage.py createsuperuser
 
+shell:
+	docker-compose exec $(WEB) python manage.py shell
+
 
 # Start connections
 up:
@@ -27,6 +30,21 @@ down:
 # Build containers
 build:
 	docker-compose -f docker-compose.yml build
+
+rebuild:
+	docker-compose build --no-cache
+
+
+# Run tests
+test:
+	docker-compose exec $(WEB) python manage.py test
+
+
+# Linting
+lint:
+	flake8 .
+	isort --check-only .
+	black --check .
 
 
 # Format code
