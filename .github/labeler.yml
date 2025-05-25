@@ -1,0 +1,18 @@
+features:
+  - "jobs/**"
+  - "analytics/**"
+
+bugfix:
+  - "fixes/**"
+  - "**/bug_*"
+
+docs:
+  - "*.md"
+  - "docs/**"
+
+chore:
+  - ".github/**"
+  - ".pre-commit-config.yaml"
+
+refactor:
+  - "*/refactor_*"

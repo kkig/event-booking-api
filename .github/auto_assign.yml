@@ -1,0 +1,13 @@
+# Add reviewers to pull requests
+addReviewers: true
+
+# List of reviewers (GitHub user name)
+reviewers:
+  - kkig
+  - reviewers2
+
+# Add assignees to pull requests
+addAssignees: false
+
+# Number of reviewers added (set 0 for all)
+numberOfReviewers: 0
