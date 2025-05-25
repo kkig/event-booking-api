@@ -7,6 +7,9 @@ migrate:
 makemigrations:
 	docker-compose exec $(WEB) python manage.py makemigrations
 
+createsuperuser:
+	docker-compose exec $(WEB) python manage.py createsuperuser
+
 
 # Start connections
 up:
