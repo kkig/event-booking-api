@@ -27,3 +27,10 @@ down:
 # Build containers
 build:
 	docker-compose -f docker-compose.yml build
+
+
+# Format code
+format:
+	black .
+	flake8 .
+	isort .
