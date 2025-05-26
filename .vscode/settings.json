@@ -1,0 +1,48 @@
+{
+  // Use the virtual environment Python interpreter inside the project
+  "python.pythonPath": "${workspaceFolder}/venv/bin/python",
+
+  // Format the file automatically on save using Black
+  "editor.formatOnSave": true,
+  
+  // Use Black as the default formatter for Python files
+  "python.formatting.provider": "black",
+  
+  // Linting settings
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": false,
+  "python.linting.pylintEnabled": false,
+  
+  // Exclude common cache and environment folders from explorer and search
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/venv": true,
+    "**/.mypy_cache": true,
+    "**/.tox": true,
+    "**/.cache": true
+  },
+
+  // Exclude the above from searches too
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/venv": true,
+    "**/.mypy_cache": true,
+    "**/.tox": true,
+    "**/.cache": true
+  },
+
+  // Use isort for import sorting on save
+  "editor.codeActionsOnSave": [
+    "source.organizeImports"
+  ],
+
+  // Show whitespace characters (optional, helps spot formatting issues)
+  "editor.renderWhitespace": "all",
+
+  // Set tab size and insert spaces (standard Python style)
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true
+}
