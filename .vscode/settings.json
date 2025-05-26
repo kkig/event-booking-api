@@ -1,11 +1,9 @@
 {
   // Use the virtual environment Python interpreter inside the project
-  "python.pythonPath": "${workspaceFolder}/venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
 
   // Format the file automatically on save using Black
   "editor.formatOnSave": true,
-  
-  // Use Black as the default formatter for Python files
   "python.formatting.provider": "black",
   
   // Linting settings
@@ -50,7 +48,9 @@
   // Show whitespace characters (optional, helps spot formatting issues)
   "editor.renderWhitespace": "all",
 
-  // Set tab size and insert spaces (standard Python style)
+  // Keep whitespace and indentation consistent
   "editor.tabSize": 4,
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
 }
