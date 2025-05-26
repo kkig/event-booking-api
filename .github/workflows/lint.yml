@@ -1,4 +1,4 @@
-name: "Linting checks"
+name: "Lint & Format Checks"
 
 on:
   push:
@@ -7,51 +7,24 @@ on:
     branches: [master, dev]
 
 jobs:
-  lint:
+  lint-format:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache Docker Layers
-        uses: actions/cache@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
+          python-version: "3.11"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image with cache
+      - name: Install Dependencies
         run: |
-          docker buildx create --use
-          docker buildx build \
-              --cache-from=type=local,src=/tmp/.buildx-cache \
-              --cache-to=type=local,dest=/tmp/.buildx-cache \
-              -f Dockerfile \
-              -t app-test .
+          python -m pip install --upgrade pip
+          pip install black flake8 isort
 
-      - name: Start Docker Compose (build and run)
+      - name: Run format and lint checks
         run: |
-          docker compose -f docker-compose.yml up -d
-
-      - name: Wait for DB to be ready
-        run: |
-          echo "Waiting for PostgreSQL to be ready..."
-          for i in {1..10}; do
-            docker compose run --rm web sh -c "python manage.py migrate > /dev/null 2>&1" && break
-            echo "Retrying in 3 seconds..."
-            sleep 3
-          done
-      - name: Run Django linters
-        run: |
-          docker compose run --rm web sh -c "
-            flake8 . &&
-            black . --check &&
-            isort . --check-only
-          "
-
-      - name: Stop containers
-        run: docker compose down
+          black . --check
+          isort . --check-only
+          flake8 .
