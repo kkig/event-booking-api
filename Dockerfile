@@ -1,11 +1,21 @@
-FROM python:3.11
+FROM python:3.13-alpine
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Env to avoid writing .pyc files and output to stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
+# Set working directory
 WORKDIR /code
 
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Copy requirements file
+COPY backend/requirements.txt .
 
-COPY . .
+# Install system dependencies and Python packages
+RUN apk add --no-cache gcc musl-dev libffi-dev \
+    && pip install --upgrade pip \
+    && pip install -r requirements.txt
+
+# Don't copy code in dev - mounted via volume
+# COPY backend .
+
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--reload"]
