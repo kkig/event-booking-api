@@ -3,7 +3,7 @@ target-version = ['py313']
 include = '\.py$'
 exclude = '''
 (?x)(
-    /(\.venv|venv|build|dist|migrations|__pycache__)/
+    /(\.venv|venv|build|dist|migrations|__pycache__|\.git)/
     | manage\.py$
     # | config/settings\.py$
 )
@@ -13,4 +13,4 @@ exclude = '''
 profile = "black"
 line_length = 88
 known_first_party = ["apps", "config"]
-skip = ["migrations", "venv", ".venv"]
+skip = ["migrations", "venv", ".venv", ".git"]

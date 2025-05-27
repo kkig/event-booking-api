@@ -17,18 +17,11 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY", default="unsafe-default-key")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=True, cast=bool)
-
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost").split(",")
-
 
 # Application definition
 
@@ -60,6 +53,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -80,7 +74,7 @@ DATABASES = {
         "NAME": config("POSTGRES_DB", default="expense_db"),
         "USER": config("POSTGRES_USER", default="expense_user"),
         "PASSWORD": config("POSTGRES_PASSWORD", default="expense_pass"),
-        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "HOST": config("POSTGRES_HOST", default="db"),
         "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
