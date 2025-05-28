@@ -4,7 +4,7 @@ WEB=web
 migrate:
 	docker-compose exec $(WEB) python manage.py migrate
 
-makemigrations:
+migrations:
 	docker-compose exec $(WEB) python manage.py makemigrations
 
 createsuperuser:
