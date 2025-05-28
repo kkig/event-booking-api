@@ -33,6 +33,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "drf_spectacular",
     # Local apps
     "accounts",
     "bookings",
@@ -125,3 +129,21 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# drf-spectacular setup
+REST_FRAMEWORK = {
+    # DRF use drf-spectacular to auto generate OpenAPI schema
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # Sets JWT auth as default method for securing endpoints
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+# Configure metadata for /schema/, /swagger/ and /redoc/
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Ticketing API",
+    "DESCRIPTION": "Event Ticketing and Booking API",
+    "VERSION": "1.0.0",
+}
