@@ -38,4 +38,5 @@ urlpatterns = [
     ),
     # Include your app routes here
     path("api/auth/", include("accounts.urls")),
+    path("api/events/", include("events.urls")),
 ]
