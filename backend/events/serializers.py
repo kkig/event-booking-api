@@ -34,8 +34,8 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "price",
-            "quantity",
+            "quantity_sold",
             "quantity_available",
             "created_at",
         ]
-        read_only_fields = ["id", "quantity_available", "created_at", "event"]
+        read_only_fields = ["id", "created_at", "event"]
