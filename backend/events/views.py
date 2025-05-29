@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 
 from .models import Event, TicketType
@@ -46,21 +46,25 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer.save(organizer=self.request.user)
 
 
-class TicketTypeViewSet(viewsets.ModelViewSet):
+class TicketTypeViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
     """
-    Handle all the CRUD logic for the `TicketType`.
+    Handle GET/POST logic for the `TicketType`.
 
-    `list`(GET), `retrieve`(GET by ID), `create`(POST),`update/partial_update`(PUT/PATCH), `destroy`(DELETE)
+    `list`(GET), `create`(POST)
     """
 
     serializer_class = TicketTypeSerializer
     permission_classes = [permissions.IsAuthenticated, IsOrganizerOrReadOnly]
 
     def get_queryset(self):
+        """Called on list(GET) request."""
         event_id = self.kwargs.get("event_pk")
         return TicketType.objects.filter(event_id=event_id)
 
     def perform_create(self, serializer):
+        """Called on create(POST) request."""
         event_id = self.kwargs.get("event_pk")
         event = Event.objects.get(pk=event_id)
 
