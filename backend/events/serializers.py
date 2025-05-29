@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Event
+from .models import Event, TicketType
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -23,3 +23,19 @@ class EventSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "organizer", "created_at", "updated_at"]
+
+
+class TicketTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TicketType
+        fields = [
+            "id",
+            "event",
+            "name",
+            "description",
+            "price",
+            "quantity",
+            "quantity_available",
+            "created_at",
+        ]
+        read_only_fields = ["id", "quantity_available", "created_at"]
