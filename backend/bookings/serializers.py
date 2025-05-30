@@ -93,3 +93,29 @@ class BookingSerializer(serializers.Serializer):
             )
 
         return booking
+
+
+class BookingItemSerializer(serializers.ModelSerializer):
+    """Define response format for each booking item."""
+
+    # Required field for request
+    # source -> Get name field of ticket_type(FK) in BookingItem
+    event_name = serializers.CharField(source="event.name", read_only=True)
+    ticket_type_name = serializers.CharField(source="ticket_type.name", read_only=True)
+
+    class Meta:
+        model = BookingItem
+        fields = ["id", "event_name", "ticket_type_name", "quantity"]
+
+
+class BookingDetailSerializer(serializers.ModelSerializer):
+    """Define response format for each booking."""
+
+    # Get booking items where parent is current booking - booking.items.all()
+    items = BookingItemSerializer(source="items", many=True)
+    event_name = serializers.CharField(source="event.name", read_only=True)
+
+    class Meta:
+        model = Booking
+        # Fields we want in response
+        fields = ["id", "event_name", "status", "created_at", "items"]
