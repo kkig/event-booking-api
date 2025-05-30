@@ -1,0 +1,9 @@
+[pytest]
+env_files = .env
+python_files = tests.py test_*.py *_tests.py
+addopts = --nomigrations --reuse-db -s -v --ds=config.settings.development
+# --nomigrations: Don't run migrations on test DB
+# --reuse-db: Reuses test database between runs for speed (great for large suites)
+# -s: Allow print statements in tests
+# -v: Verbose output
+# --ds: Specify Django settings module

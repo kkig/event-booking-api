@@ -1,6 +1,8 @@
 import factory
 from bookings.models import BookingItem
-from common.tests.factories import BookingFactory, TicketTypeFactory
+
+from .booking_factory import BookingFactory
+from .ticket_type_factory import TicketTypeFactory
 
 
 class BookingItemFactory(factory.django.DjangoModelFactory):

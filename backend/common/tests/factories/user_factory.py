@@ -26,6 +26,12 @@ class UserFactory(factory.django.DjangoModelFactory):
     )
     role = UserRole.ATTENDEE
 
+    @classmethod
+    def _after_postgeneration(cls, obj, create, results=None):
+        # Manually save after postgeneration
+        if create:
+            obj.save()
+
 
 class OrganizerFactory(UserFactory):
     role = UserRole.ORGANIZER

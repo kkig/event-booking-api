@@ -1,7 +1,9 @@
 import factory
 from bookings.models import Booking
 from common.choices import BookingStatus
-from common.tests.factories import EventFactory, UserFactory
+
+from .event_factory import EventFactory
+from .user_factory import UserFactory
 
 
 class BookingFactory(factory.django.DjangoModelFactory):

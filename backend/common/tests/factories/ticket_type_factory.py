@@ -1,6 +1,7 @@
 import factory
-from common.tests.factories import EventFactory
 from events.models import TicketType
+
+from .event_factory import EventFactory
 
 
 class TicketTypeFactory(factory.django.DjangoModelFactory):

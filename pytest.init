@@ -1,3 +1,0 @@
-[pytest]
-env_files = .env
-python_files = test_*.py

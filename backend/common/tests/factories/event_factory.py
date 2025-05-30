@@ -2,9 +2,10 @@ from datetime import timedelta
 
 import factory
 from common.choices import EventStatus
-from common.tests.factories import UserFactory
 from django.utils import timezone
 from events.models import Event
+
+from .user_factory import UserFactory
 
 
 class EventFactory(factory.django.DjangoModelFactory):
