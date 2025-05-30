@@ -3,6 +3,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import RegisterView
 
+app_name = "accounts"
+
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     # Authenticate and return access + refresh token pair - token based auth
