@@ -1,4 +1,5 @@
 import factory
+from common.choices import UserRole
 from django.contrib.auth import get_user_model
 from faker import Faker
 
@@ -23,8 +24,8 @@ class UserFactory(factory.django.DjangoModelFactory):
     password = factory.PostGenerationMethodCall(
         "set_password", "password123"  # Default password for tests
     )
-    role = "attendee"
+    role = UserRole.ATTENDEE
 
 
 class OrganizerFactory(UserFactory):
-    role = "organizer"
+    role = UserRole.ORGANIZER
