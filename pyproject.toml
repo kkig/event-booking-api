@@ -15,6 +15,3 @@ line_length = 88
 known_first_party = ["apps", "config"]
 skip = ["migrations", "venv", ".venv", ".git"]
 
-[pytest]
-DJANGO_SETTINGS_MODULE = config.settings.development
-python_files = test.py test_*.py *_test.py
