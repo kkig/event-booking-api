@@ -112,7 +112,7 @@ class BookingDetailSerializer(serializers.ModelSerializer):
 
     # Get booking items where parent is current booking - booking.items.all()
     items = BookingItemSerializer(many=True)
-    event_name = serializers.CharField(source="event.title", read_only=True)
+    event_name = serializers.CharField(source="event.name", read_only=True)
 
     class Meta:
         model = Booking
