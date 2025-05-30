@@ -1,7 +1,6 @@
+from bookings.models import Booking
+from bookings.serializers import BookingDetailSerializer
 from rest_framework import generics, permissions
-
-from backend.bookings.models import Booking
-from backend.bookings.serializers import BookingDetailSerializer
 
 
 class BookingListView(generics.ListAPIView):
@@ -14,5 +13,5 @@ class BookingListView(generics.ListAPIView):
             .select_related("event")
             .prefetch_related(
                 "items__ticket_type"
-            )  # Optimized for many to many relationship
+            )  # Optimized for one to many relationship
         )

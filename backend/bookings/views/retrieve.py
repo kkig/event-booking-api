@@ -1,7 +1,6 @@
+from bookings.models import Booking
+from bookings.serializers import BookingDetailSerializer
 from rest_framework import generics, permissions
-
-from backend.bookings.models import Booking
-from backend.bookings.serializers import BookingDetailSerializer
 
 
 class BookingDetailView(generics.RetrieveAPIView):
@@ -12,5 +11,7 @@ class BookingDetailView(generics.RetrieveAPIView):
         return (
             Booking.objects.filter(user=self.request.user)
             .select_related("event")
-            .prefetch_related("items__ticket_type")
-        )  # Optimizing booking.all() + booking.items.all() + item.ticket_type
+            .prefetch_related(
+                "items__ticket_type"
+            )  # Optimizing booking.all() + booking.items.all() + item.ticket_type
+        )
