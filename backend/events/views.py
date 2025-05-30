@@ -31,7 +31,7 @@ class EventViewSet(viewsets.ModelViewSet):
     filterset_fields = ["status", "location"]
 
     # Free-text search
-    search_fields = ["title", "description"]
+    search_fields = ["name", "description"]
 
     # Allow sorting
     ordering_fields = ["start_time", "capacity", "created_at"]
