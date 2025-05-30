@@ -1,17 +1,19 @@
 {
+  // Treat /backend as top-level module path
+  "python.analysis.extraPaths": ["./backend"],
   // Use the virtual environment Python interpreter inside the project
   "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
 
   // Format the file automatically on save using Black
   "editor.formatOnSave": true,
   "python.formatting.provider": "black",
-  
+
   // Linting settings
   "python.linting.enabled": true,
   "python.linting.flake8Enabled": true,
   "python.linting.mypyEnabled": false,
   "python.linting.pylintEnabled": false,
-  
+
   // Pylance
   "python.languageServer": "Pylance",
   "python.analysis.typeCheckingMode": "basic",
