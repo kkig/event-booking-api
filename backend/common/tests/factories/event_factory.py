@@ -1,22 +1,22 @@
-from datetime import timedelta
+# from datetime import timedelta
 
-import factory
-from common.choices import EventStatus
-from django.utils import timezone
-from events.models import Event
+# import factory
+# from common.choices import EventStatus
+# from django.utils import timezone
+# from events.models import Event
 
-from .user_factory import UserFactory
+# from ....accounts.tests.factories import UserFactory
 
 
-class EventFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Event
+# class EventFactory(factory.django.DjangoModelFactory):
+#     class Meta:
+#         model = Event
 
-    organizer = factory.SubFactory(UserFactory)
-    name = factory.Sequence(lambda n: f"Test Event {n}")
-    description = factory.Faker("paragraph")
-    location = factory.Faker("city")
-    start_time = factory.LazyFunction(lambda: timezone.now() + timedelta(days=1))
-    end_time = factory.LazyAttribute(lambda obj: obj.start_time + timedelta(hours=2))
-    capacity = 100
-    status = EventStatus.UPCOMING
+#     organizer = factory.SubFactory(UserFactory)
+#     name = factory.Sequence(lambda n: f"Test Event {n}")
+#     description = factory.Faker("paragraph")
+#     location = factory.Faker("city")
+#     start_time = factory.LazyFunction(lambda: timezone.now() + timedelta(days=1))
+#     end_time = factory.LazyAttribute(lambda obj: obj.start_time + timedelta(hours=2))
+#     capacity = 100
+#     status = EventStatus.UPCOMING
