@@ -5,6 +5,20 @@ User = get_user_model()
 
 
 @pytest.mark.django_db
+def test_attendee_user_creation(attendee_factory):
+    """
+    Test that a user created via AttendeeFactory has the 'attendee' role.
+    """
+    attendee = attendee_factory.create()
+
+    assert attendee.id is not None
+    assert attendee.username.startswith("user")
+    assert attendee.email.startswith("user")
+    assert attendee.role == "attendee"
+    assert attendee.check_password("password123")
+
+
+@pytest.mark.django_db
 def test_organizer_user_creation(organizer_factory):
     """
     Test that a user created via OrganizerFactory has the 'organizer' role.
