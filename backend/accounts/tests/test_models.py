@@ -33,22 +33,23 @@ def test_organizer_user_creation(organizer_factory):
     assert organizer.check_password("password123")
 
 
-@pytest.mark.django_db
+# No @pytest.mark.django_db needed if no DB interaction
 def test_user_str_representation(attendee_factory):
     """
     Test the __str__ method of the User model.
     """
-    user = attendee_factory.create(username="samadams")
+    # In-memory User using .build, not hitting DB
+    user = attendee_factory.build(username="samadams")
     assert str(user) == "samadams"
 
 
-@pytest.mark.django_db
+# No @pytest.mark.django_db needed
 def test_user_role_choices(user_factory):
     """
     Test that user roles can be set to valid choices.
     """
-    organizer_user = user_factory.create(role=UserRole.ORGANIZER)
+    organizer_user = user_factory.build(role=UserRole.ORGANIZER)
     assert organizer_user.role == UserRole.ORGANIZER
 
-    attendee_user = user_factory.create(role=UserRole.ATTENDEE)
+    attendee_user = user_factory.build(role=UserRole.ATTENDEE)
     assert attendee_user.role == UserRole.ATTENDEE
