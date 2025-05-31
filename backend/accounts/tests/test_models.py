@@ -1,17 +1,15 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from .factories import AttendeeFactory, OrganizerFactory
-
 User = get_user_model()
 
 
 @pytest.mark.django_db
-def test_organizer_user_creation():
+def test_organizer_user_creation(organizer_factory):
     """
     Test that a user created via OrganizerFactory has the 'organizer' role.
     """
-    organizer = OrganizerFactory()
+    organizer = organizer_factory.create()
 
     assert organizer.id is not None
     assert organizer.username.startswith("user")
@@ -21,9 +19,9 @@ def test_organizer_user_creation():
 
 
 @pytest.mark.django_db
-def test_user_str_representation():
+def test_user_str_representation(attendee_factory):
     """
     Test the __str__ method of the User model.
     """
-    user = AttendeeFactory(username="samadams")
+    user = attendee_factory.create(username="samadams")
     assert str(user) == "samadams"
