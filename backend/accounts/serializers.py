@@ -1,7 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .models import User
+User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -28,3 +29,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        # DO NOT include 'password
+        # Use a separate password change endpoint.
+        fields = ["id", "username", "email", "role"]
+
+        # User usually can't change their ID or role
+        read_only_fields = ["id", "role"]
