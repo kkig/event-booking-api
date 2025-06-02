@@ -3,6 +3,8 @@ from rest_framework_nested.routers import NestedDefaultRouter
 
 from .views import EventViewSet, TicketTypeViewSet
 
+app_name = "events"
+
 # Router instance that generates url partterns
 # (e.g. GET /, GET /<id>)
 router = DefaultRouter()

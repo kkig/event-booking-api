@@ -1,6 +1,11 @@
 from django.db import models
 
 
+class UserRole(models.TextChoices):
+    ATTENDEE = "attendee", "Attendee"
+    ORGANIZER = "organizer", "Organizer"
+
+
 class BookingStatus(models.TextChoices):
     PENDING = "pending", "Pending"
     CONFIRMED = "confirmed", "Confirmed"

@@ -4,6 +4,7 @@ from django.urls import path
 from .views import BookingCreateView, BookingDetailView, BookingListView
 
 url_prefix = "bookings/"
+app_name = "bookings"
 
 urlpatterns = [
     path("users/me/bookings", BookingListView.as_view(), name="my-bookings"),

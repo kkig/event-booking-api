@@ -37,7 +37,7 @@ rebuild:
 
 # Run tests
 test:
-	docker-compose exec $(WEB) python manage.py test
+	docker-compose exec $(WEB) pytest
 
 
 # Linting
