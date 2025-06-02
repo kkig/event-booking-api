@@ -2,7 +2,7 @@
 from typing import cast
 
 import pytest
-from accounts.models import User as CustomUser
+from accounts.models import User as MyUser
 from common.choices import UserRole
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -33,7 +33,7 @@ def test_user_registration_success(api_client):
     _user_instance = User.objects.first()
     assert _user_instance is not None
 
-    created_user = cast(CustomUser, _user_instance)
+    created_user: MyUser = cast(MyUser, _user_instance)
     assert created_user.username == "newapiuser"
     assert created_user.email == "newapiuser@example.com"
     assert created_user.check_password("Strong@Password123!")
