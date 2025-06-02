@@ -6,7 +6,10 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Defines serializer for user registration."""
+    """
+    Defines serializer for user registration.
+    `ModelSerializer` will adds validators based on model field constrains.
+    """
 
     # Overrides password to validate and write-only
     # Exclude from response
@@ -16,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Model to base serialization on
         model = User
         # Fields to include in I/O JSON
-        fields = ("id", "username", "email", "password", "role")
+        fields = ("username", "email", "password", "role")
 
     def create(self, validated_data):
         """Called when serializer.save()"""
@@ -40,3 +43,15 @@ class UserSerializer(serializers.ModelSerializer):
 
         # User usually can't change their ID or role
         read_only_fields = ["id", "role"]
+
+    def validate_email(self, value):
+        if self.instance and self.instance.email == value:
+            # Email hasn't changed for this instance
+            return value
+
+        # Check if the email already exists for any other user
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "This email address is already in use by another user."
+            )
+        return value
