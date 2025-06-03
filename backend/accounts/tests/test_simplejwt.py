@@ -14,6 +14,7 @@ User = get_user_model()
 LOGIN_URL = reverse("accounts:token_obtain_pair")
 REFRESH_TOKEN_URL = reverse("accounts:token_refresh")
 USER_PROFILE_URL = reverse("accounts:user_profile")
+CHANGE_PASSWORD_URL = reverse("accounts:change_password")
 
 
 # === Tests for JWT Authentication (Login) === #
@@ -352,3 +353,163 @@ def test_user_profile_update_read_only_fields(api_client, organizer_factory):
     updated_db_user: MyUser = cast(MyUser, User.objects.get(pk=db_user.pk))
     assert updated_db_user.pk == db_user.pk
     assert updated_db_user.role == UserRole.ORGANIZER.value
+
+
+# === Tests for Password Change ===
+@pytest.mark.django_db
+def test_change_password_success(api_client, organizer_factory):
+    """
+    Test an authenticated user can successfully change their password.
+    """
+    old_password = "OldSecurePassword123!"
+    new_password = "NewSecurePassword456!"
+
+    user: MyUser = cast(
+        MyUser, organizer_factory.create(email="password_test@example.com")
+    )
+    user.set_password(old_password)
+    user.save()
+
+    # Log in the user to get an access token
+    login_data = {"username": user.username, "password": old_password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    # Data for password change
+    change_password_data = {
+        "old_password": old_password,
+        "new_password1": new_password,
+        "new_password2": new_password,
+    }
+
+    response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["detail"] == "Password updated successfully."
+
+    # Verify the old password no longer works and the new one does
+    api_client.credentials()  # Clear old credentials
+    login_fail_response = api_client.post(
+        LOGIN_URL, {"username": user.username, "password": old_password}, format="json"
+    )
+
+    # Old password should fail
+    assert (
+        login_fail_response.status_code == status.HTTP_401_UNAUTHORIZED
+    )  # Old password should fail
+
+    login_success_response = api_client.post(
+        LOGIN_URL, {"username": user.username, "password": new_password}, format="json"
+    )
+
+    # New password should work
+    assert login_success_response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_change_password_incorrect_old_password(api_client, organizer_factory):
+    """
+    Tests password change fails with an incorrect old password.
+    """
+    old_password = "OriginalPassword123!"
+    new_password = "NewValidPassword456!"
+
+    user: MyUser = cast(
+        MyUser, organizer_factory.create(email="incorrect_old_pass@example.com")
+    )
+    user.set_password(old_password)
+    user.save()
+
+    login_data = {"username": user.username, "password": old_password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    change_password_data = {
+        "old_password": "WrongOldPassword!",
+        "new_password1": new_password,
+        "new_password2": new_password,
+    }
+
+    response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "old_password" in response.data
+    assert (
+        "Your old password was entered incorrectly." in response.data["old_password"][0]
+    )
+
+
+@pytest.mark.django_db
+def test_change_password_mismatched_new_passwords(api_client, organizer_factory):
+    """
+    Tests password change fails if new passwords do not match.
+    """
+    old_password = "ThePassword123!"
+    user: MyUser = cast(
+        MyUser, organizer_factory.create(email="mismatch_pass@example.com")
+    )
+    user.set_password(old_password)
+    user.save()
+
+    login_data = {"username": user.username, "password": old_password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    change_password_data = {
+        "old_password": old_password,
+        "new_password1": "NewPass123!",
+        "new_password2": "DifferentPass456!",
+    }
+
+    response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "new_password2" in response.data
+    assert "New passwords do not match." in response.data["new_password2"][0]
+
+
+@pytest.mark.django_db
+def test_change_password_invalid_new_password_strength(api_client, organizer_factory):
+    """
+    Tests password change fails if new password does not meet strength requirements.
+    (e.g., too common, too short based on Django's validators)
+    """
+    old_password = "StrongOldPassword123!"
+    user: MyUser = cast(
+        MyUser, organizer_factory.create(email="invalid_new_pass@example.com")
+    )
+    user.set_password(old_password)
+    user.save()
+
+    login_data = {"username": user.username, "password": old_password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    change_password_data = {
+        "old_password": old_password,
+        "new_password1": "123",  # Too short/weak
+        "new_password2": "123",
+    }
+
+    response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "new_password1" in response.data
+    assert "This password is too short." in response.data["new_password1"][0]
+
+
+@pytest.mark.django_db
+def test_change_password_unauthenticated(api_client):
+    """
+    Tests unauthenticated user cannot change password.
+    """
+    change_password_data = {
+        "old_password": "any",
+        "new_password1": "new",
+        "new_password2": "new",
+    }
+    response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
