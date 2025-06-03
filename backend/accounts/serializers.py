@@ -1,6 +1,12 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
 
 User = get_user_model()
@@ -124,3 +130,67 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data["new_password1"])
         user.save()
         return user
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for requesting a password reset email.
+    Takes email and validates its existence.
+    """
+
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        fields = ["email"]
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            # Store the user object in serializer context for later user in save()
+            self.context["user"] = user
+        except User.DoesNotExist:
+            # For security reasons, don't confirm if email exists or not.
+            # Just return a success message even if email doesn't exist.
+            # This prevents email enumeration.
+            pass
+        return value
+
+    def save(self):
+        """
+        Generates a password reset token and sends an email to the user.
+        """
+        user = self.context.get("user")
+        if user:
+            # Only send email if user exists (after validation)
+            token_generator = PasswordResetTokenGenerator()
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
+
+            # Construct the reset link (Frontend needs to handle this base URL)
+            # For testing, you might need a placeholder or a mock URL.
+            # In a real app, this would be a link to your frontend's password reset page
+            # e.g., f"https://example.com/reset-password/{uid}/{token}/"
+
+            # Placeholder URL
+            reset_link = f"http://127.0.0.1:8000/api/auth/password-reset-confirmation/{uid}/{token}/"
+
+            # Render email content (you'll create this template)
+            email_subject = "Password Reset Request"
+            email_body = render_to_string(
+                "accounts/password_reset_email.html",
+                {
+                    "user": user,
+                    "reset_link": reset_link,
+                    "domain": "127.0.0.1:8000",
+                    "uid": uid,
+                    "token": token,
+                },
+            )
+
+            email = EmailMessage(
+                email_subject, email_body, settings.DEFAULT_FROM_EMAIL, [user.email]
+            )
+            email.send()
+
+        # Always returns success to prevent email enumeration, even if user doesn't exist
+        return True

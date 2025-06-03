@@ -21,3 +21,14 @@ DATABASES["default"].update(
         "PORT": config("POSTGRES_PORT", default="5432"),
     }
 )
+
+# === Email configuration for Development ===
+
+# Prints emails to console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Required for sending emails
+DEFAULT_FROM_EMAIL = "no-reply@mydomain.com"
+
+# Error emails will come here
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
