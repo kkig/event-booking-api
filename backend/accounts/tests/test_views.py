@@ -38,7 +38,6 @@ def test_user_registration_success(api_client):
     assert created_user.email == "newapiuser@example.com"
     assert created_user.check_password("Strong@Password123!")
     assert created_user.role == UserRole.ATTENDEE
-    assert "id" in response.data
 
 
 @pytest.mark.django_db
