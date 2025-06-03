@@ -7,13 +7,9 @@
 
   // Format the file automatically on save using Black
   "editor.formatOnSave": true,
-  "python.formatting.provider": "black",
-
-  // Linting settings
-  "python.linting.enabled": true,
-  "python.linting.flake8Enabled": true,
-  "python.linting.mypyEnabled": false,
-  "python.linting.pylintEnabled": false,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
 
   // Pylance
   "python.languageServer": "Pylance",
@@ -23,7 +19,11 @@
   "python.analysis.autoSearchPaths": true,
   "python.analysis.useLibraryCodeForTypes": true,
   "python.analysis.diagnosticSeverityOverrides": {
-    "reportPrivateImportUsage": "none"
+    "reportPrivateImportUsage": "none",
+    "reportUnusedVariable": "information",
+    // "reportUnknownMemberType": "none",
+    // "reportUnknownVariableType": "none",
+    // "reportUnknownArgumentType": "none"
   },
 
   // Exclude common cache and environment folders from explorer and search
