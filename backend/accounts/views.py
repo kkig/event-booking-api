@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .constants import PASSWORD_RESET_MESSAGE
 from .serializers import (
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
@@ -77,9 +78,7 @@ class PasswordResetRequestView(APIView):
             serializer.save()
             # Always return a success message for security (prevents email enumeration)
             return Response(
-                {
-                    "detail": "If an ccount with that email exists, a password reset email has been sent."
-                },
+                {"detail": PASSWORD_RESET_MESSAGE},
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

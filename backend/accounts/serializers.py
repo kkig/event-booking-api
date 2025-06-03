@@ -9,6 +9,8 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
 
+from .constants import PASSWORD_RESET_SUBJECT
+
 User = get_user_model()
 
 
@@ -175,7 +177,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             reset_link = f"http://127.0.0.1:8000/api/auth/password-reset-confirmation/{uid}/{token}/"
 
             # Render email content (you'll create this template)
-            email_subject = "Password Reset Request"
+            email_subject = PASSWORD_RESET_SUBJECT
             email_body = render_to_string(
                 "accounts/password_reset_email.html",
                 {
