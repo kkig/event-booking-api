@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import (
     ChangePasswordView,
+    PasswordResetConfirmView,
     PasswordResetRequestView,
     RegisterView,
     UserProfileView,
@@ -22,5 +23,10 @@ urlpatterns = [
         "password-reset-request/",
         PasswordResetRequestView.as_view(),
         name="password_reset_request",
+    ),
+    path(
+        r"password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$",
+        PasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
     ),
 ]

@@ -36,6 +36,8 @@
   "python.analysis.diagnosticSeverityOverrides": {
     "reportPrivateImportUsage": "none",
     "reportUnusedVariable": "information",
+    "reportOptionalSubscript": "none",
+    "reportIndexIssue": "none",
     // "reportUnknownMemberType": "none",
     // "reportUnknownVariableType": "none",
     // "reportUnknownArgumentType": "none"

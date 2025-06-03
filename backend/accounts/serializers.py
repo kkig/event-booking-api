@@ -5,11 +5,15 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import serializers
 
-from .constants import PASSWORD_RESET_SUBJECT
+from .constants import (
+    PASSWORD_RESET_SUBJECT,
+    NewPasswords,
+    PasswordMessasges,
+)
 
 User = get_user_model()
 
@@ -196,3 +200,59 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 
         # Always returns success to prevent email enumeration, even if user doesn't exist
         return True
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for confirming a password reset.
+    Takes uid (user ID), token, new_password1, and new_password2.
+    """
+
+    uid = serializers.CharField(required=True)
+    token = serializers.CharField(required=True)
+    new_password1 = serializers.CharField(required=True, write_only=True)
+    new_password2 = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        # Validate that new password match
+        if data[NewPasswords.ONE] != data[NewPasswords.TWO]:
+            raise serializers.ValidationError(
+                {NewPasswords.TWO: NewPasswords.NOT_MATCH}
+            )
+
+        # Decode UID and get user
+        try:
+            # INPORTANT: urlsafe_base64_decode is used to conver the base64 encoded UID
+            # back to its original form (bytes), then force_str to convert to string.
+            uid = force_str(urlsafe_base64_decode(data["uid"]))
+            user = User._default_manager.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            raise serializers.ValidationError(
+                {"uid": PasswordMessasges.INVALID_UID_OR_NO_USER}
+            )
+
+        # Validate the token
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, data["token"]):
+            raise serializers.ValidationError(
+                {"token": PasswordMessasges.RESET_LINK_EXPIRED}
+            )
+
+        # Apply Django's password validators to the new password
+        try:
+            validate_password(data[NewPasswords.ONE], user)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({NewPasswords.ONE: list(e)})
+
+        # Store the user object in context for the save method
+        self.context["user"] = user
+        return data
+
+    def save(self, **kwargs):
+        """
+        Sets the new password for the user after successful validation.
+        """
+        user = self.context["user"]
+        user.set_password(self.validated_data[NewPasswords.ONE])
+        user.save()
+        return user
