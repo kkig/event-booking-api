@@ -3,6 +3,7 @@ from typing import cast
 
 import pytest
 from accounts.models import User as MyUser
+from common.choices import UserRole
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -12,6 +13,7 @@ User = get_user_model()
 
 LOGIN_URL = reverse("accounts:token_obtain_pair")
 REFRESH_TOKEN_URL = reverse("accounts:token_refresh")
+USER_PROFILE_URL = reverse("accounts:user_profile")
 
 
 # === Tests for JWT Authentication (Login) === #
@@ -229,3 +231,124 @@ def test_jwt_token_refresh_missing_token(api_client):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "refresh" in response.data  # Expect serializer validation error
     assert "This field is required." in response.data["refresh"]
+
+
+# === Tests for User Profile Management ===
+@pytest.mark.django_db
+def test_user_profile_retrieve_authenticated(api_client, organizer_factory):
+    """
+    Tests authenticated user can retrieve their own profile data.
+    """
+    password = "ProfileTestPassword123!"
+    new_user: MyUser = cast(MyUser, organizer_factory.create(email="test@example.com"))
+    new_user.set_password(password)
+    new_user.save()
+
+    user: MyUser = cast(MyUser, User.objects.get(pk=new_user.pk))
+
+    # Authenticate the client
+    data = {"username": user.username, "password": password}
+    login_response = api_client.post(LOGIN_URL, data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    # Send GET request to profile endpoint
+    response = api_client.get(USER_PROFILE_URL)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["id"] == user.pk
+    assert response.data["username"] == user.username
+    assert response.data["email"] == "test@example.com"
+    assert response.data["role"] == UserRole.ORGANIZER.value
+
+
+def test_user_profile_retrieve_unauthenticated(api_client):
+    """
+    Tests unauthenticated user cannot retrieve profile data.
+    """
+    response = api_client.get(USER_PROFILE_URL)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_user_profile_update_authenticated(api_client, organizer_factory):
+    """
+    Tests authenticated user can update their own profile data.
+    """
+    password = "UpdateTestPassword123!"
+    new_user: MyUser = cast(MyUser, organizer_factory.build(email="old@example.com"))
+    new_user.set_password(password)
+    new_user.save()
+    user: MyUser = cast(MyUser, User.objects.get(pk=new_user.pk))
+
+    # Authenticate the client
+    login_data = {"username": user.username, "password": password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    # Data to update
+    update_data = {
+        "email": "new@example.com",
+    }
+
+    # Send PUT/PATCH request to profile endpoint - PATCH for partial update
+    response = api_client.patch(USER_PROFILE_URL, update_data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["email"] == "new@example.com"
+
+    # Verify data actually changed in the database
+    updated_user: MyUser = cast(MyUser, User.objects.get(pk=user.pk))
+    assert updated_user.email == "new@example.com"
+    assert updated_user.username == user.username
+
+
+def test_user_profile_update_unauthenticated(api_client):
+    """
+    Test unauthenticated user cannot update profile data.
+    """
+    data = {"email": "hacker@example.com"}
+    response = api_client.patch(USER_PROFILE_URL, data, format="json")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_user_profile_update_read_only_fields(api_client, organizer_factory):
+    """
+    Tests user cannot update read-only fields (like ID or role).
+    """
+    password = "ReadOnlyTestPassword123!"
+    new_user: MyUser = cast(
+        MyUser,
+        organizer_factory.build(
+            email="read_only@example.com", role=UserRole.ORGANIZER.value
+        ),
+    )
+    new_user.set_password(password)
+    new_user.save()
+
+    db_user: MyUser = cast(MyUser, User.objects.get(pk=new_user.pk))
+
+    # Authenticate the client
+    login_data = {"username": db_user.username, "password": password}
+    login_response = api_client.post(LOGIN_URL, login_data, format="json")
+    access_token = login_response.data["access"]
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+
+    # Attempt to update read-only fields
+    bad_update_data = {
+        "id": 9999,  # Trying to change ID
+        "role": UserRole.ATTENDEE.value,  # Trying to change role
+    }
+
+    response = api_client.patch(USER_PROFILE_URL, bad_update_data, format="json")
+
+    # Expect 200 OK because DRF by default ignores read-only fields on update.
+    # The key is to assert that the values in the DB did NOT change.
+    assert response.status_code == status.HTTP_200_OK
+
+    # Verify data did NOT change in the database
+    updated_db_user: MyUser = cast(MyUser, User.objects.get(pk=db_user.pk))
+    assert updated_db_user.pk == db_user.pk
+    assert updated_db_user.role == UserRole.ORGANIZER.value

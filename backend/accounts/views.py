@@ -20,7 +20,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     """
 
     serializer_class = UserSerializer
-    permission_class = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         """
