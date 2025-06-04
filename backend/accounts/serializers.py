@@ -11,7 +11,6 @@ from rest_framework import serializers
 
 from .constants import (
     PASSWORD_RESET_SUBJECT,
-    NewPasswords,
     PasswordMessasges,
 )
 
@@ -178,7 +177,9 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             # e.g., f"https://example.com/reset-password/{uid}/{token}/"
 
             # Placeholder URL
-            reset_link = f"http://127.0.0.1:8000/api/auth/password-reset-confirmation/{uid}/{token}/"
+            reset_link = (
+                f"http://127.0.0.1:8000/api/auth/password-reset-confirm/{uid}/{token}/"
+            )
 
             # Render email content (you'll create this template)
             email_subject = PASSWORD_RESET_SUBJECT
@@ -215,9 +216,9 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
     def validate(self, data):
         # Validate that new password match
-        if data[NewPasswords.ONE] != data[NewPasswords.TWO]:
+        if data["new_password1"] != data["new_password2"]:
             raise serializers.ValidationError(
-                {NewPasswords.TWO: NewPasswords.NOT_MATCH}
+                {"new_password2": PasswordMessasges.NOT_MATCH}
             )
 
         # Decode UID and get user
@@ -240,9 +241,9 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         # Apply Django's password validators to the new password
         try:
-            validate_password(data[NewPasswords.ONE], user)
+            validate_password(data["new_password1"], user)
         except DjangoValidationError as e:
-            raise serializers.ValidationError({NewPasswords.ONE: list(e)})
+            raise serializers.ValidationError({"new_password1": list(e)})
 
         # Store the user object in context for the save method
         self.context["user"] = user
@@ -253,6 +254,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         Sets the new password for the user after successful validation.
         """
         user = self.context["user"]
-        user.set_password(self.validated_data[NewPasswords.ONE])
+        user.set_password(self.validated_data["new_password1"])
         user.save()
         return user

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .views import (
@@ -10,6 +10,9 @@ from .views import (
 )
 
 app_name = "accounts"
+reset_url_pattern = (
+    r"(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$"
+)
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
@@ -24,8 +27,9 @@ urlpatterns = [
         PasswordResetRequestView.as_view(),
         name="password_reset_request",
     ),
-    path(
-        r"password-reset-confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$",
+    # re_path is used to capture uid and token parts with slashes
+    re_path(
+        rf"password-reset-confirm/{reset_url_pattern}",
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
