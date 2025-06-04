@@ -6,9 +6,24 @@
   "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
 
   // Format the file automatically on save using Black
-  "editor.formatOnSave": true,
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+  },
+
+  // Django HTML formatting
+  "files.associations": {
+    "**/templates/**/*.html": "django-html"
+  },
+  "[django-html]": {
+    "editor.defaultFormatter": "monosans.djlint",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": true,
+      "strings": true
+    },
+    "djlint.enableLinting": true,
+    "djlint.profile": "django"
   },
 
   // Pylance
@@ -21,6 +36,8 @@
   "python.analysis.diagnosticSeverityOverrides": {
     "reportPrivateImportUsage": "none",
     "reportUnusedVariable": "information",
+    "reportOptionalSubscript": "none",
+    "reportIndexIssue": "none",
     // "reportUnknownMemberType": "none",
     // "reportUnknownVariableType": "none",
     // "reportUnknownArgumentType": "none"

@@ -3,7 +3,14 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import ChangePasswordSerializer, RegisterSerializer, UserSerializer
+from .constants import PASSWORD_RESET_MESSAGE, PasswordMessasges
+from .serializers import (
+    ChangePasswordSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
 
 User = get_user_model()
 
@@ -53,4 +60,46 @@ class ChangePasswordView(APIView):
             )
 
         # Didn't pass validation
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetRequestView(APIView):
+    """
+    API view to request a password reset email.
+    """
+
+    # Allow unauthenticated users to request reset
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordResetRequestSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            # Always return a success message for security (prevents email enumeration)
+            return Response(
+                {"detail": PASSWORD_RESET_MESSAGE},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    API view to confirm a password reset with UID and token.
+    """
+
+    # Allow unauthenticated users to confirm reset
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = PasswordResetConfirmSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                {"detail": PasswordMessasges.RESET_CONFIRM}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

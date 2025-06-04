@@ -2,9 +2,13 @@
 from typing import cast
 
 import pytest
+from accounts.constants import PASSWORD_RESET_MESSAGE, PASSWORD_RESET_SUBJECT
 from accounts.models import User as MyUser
 from common.choices import UserRole
 from django.contrib.auth import get_user_model
+
+# Import Django's mail testing utilities
+from django.core import mail
 from django.urls import reverse
 from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken
@@ -15,6 +19,7 @@ LOGIN_URL = reverse("accounts:token_obtain_pair")
 REFRESH_TOKEN_URL = reverse("accounts:token_refresh")
 USER_PROFILE_URL = reverse("accounts:user_profile")
 CHANGE_PASSWORD_URL = reverse("accounts:change_password")
+PASSWORD_RESET_REQUEST_URL = reverse("accounts:password_reset_request")
 
 
 # === Tests for JWT Authentication (Login) === #
@@ -513,3 +518,76 @@ def test_change_password_unauthenticated(api_client):
     }
     response = api_client.post(CHANGE_PASSWORD_URL, change_password_data, format="json")
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+# === Tests for Password Reset Request ===
+@pytest.mark.django_db
+def test_password_reset_request_success_existing_email(api_client, organizer_factory):
+    """
+    Tests that a password reset email is sent for an existing user.
+    """
+    user_email = "reset_user@example.com"
+    user: MyUser = cast(MyUser, organizer_factory.create(email=user_email))
+
+    # Clear outbox to ensure we only count this specific email
+    mail.outbox = []
+
+    response = api_client.post(
+        PASSWORD_RESET_REQUEST_URL, {"email": user_email}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["detail"] == PASSWORD_RESET_MESSAGE
+
+    # Assert that one email was sent
+    assert len(mail.outbox) == 1
+
+    assert mail.outbox[0].to == [user_email]
+    assert PASSWORD_RESET_SUBJECT in mail.outbox[0].subject
+    assert user.username in mail.outbox[0].body
+
+    # Check for the reset link in the body
+    assert "password-reset-confirm" in mail.outbox[0].body
+
+
+@pytest.mark.django_db
+def test_password_reset_request_success_non_existing_email(api_client):
+    """
+    Tests that a password reset request for a non-existing email
+    still returns 200 OK (to prevent email enumeration), but not email is sent.
+    """
+    non_existing_email = "nonexistent@example.com"
+
+    mail.outbox = []  # Clear outbox
+
+    response = api_client.post(
+        PASSWORD_RESET_REQUEST_URL, {"email": non_existing_email}, format="json"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["detail"] == PASSWORD_RESET_MESSAGE
+    assert len(mail.outbox) == 0  # Assert that no email was sent
+
+
+@pytest.mark.django_db
+def test_password_reset_request_missing_email(api_client):
+    """
+    Tests that a password reset request fails if email is missing.
+    """
+    response = api_client.post(PASSWORD_RESET_REQUEST_URL, {}, format="json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "email" in response.data
+    assert "This field is required." in response.data["email"][0]
+
+
+@pytest.mark.django_db
+def test_password_reset_request_invalid_email_format(api_client):
+    """
+    Tests that a password reset request fails if email format is invalid.
+    """
+    response = api_client.post(
+        PASSWORD_RESET_REQUEST_URL, {"email": "invalid-email"}, format="json"
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "email" in response.data
+    assert "Enter a valid email address." in response.data["email"][0]

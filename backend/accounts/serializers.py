@@ -1,7 +1,18 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import serializers
+
+from .constants import (
+    PASSWORD_RESET_SUBJECT,
+    PasswordMessasges,
+)
 
 User = get_user_model()
 
@@ -121,6 +132,128 @@ class ChangePasswordSerializer(serializers.Serializer):
         ), "Validated data should be a dictionary at this point."
 
         # At this point, Pylane understands self.validated_data is a dict.
+        user.set_password(self.validated_data["new_password1"])
+        user.save()
+        return user
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """
+    Serializer for requesting a password reset email.
+    Takes email and validates its existence.
+    """
+
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        fields = ["email"]
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            # Store the user object in serializer context for later user in save()
+            self.context["user"] = user
+        except User.DoesNotExist:
+            # For security reasons, don't confirm if email exists or not.
+            # Just return a success message even if email doesn't exist.
+            # This prevents email enumeration.
+            pass
+        return value
+
+    def save(self):
+        """
+        Generates a password reset token and sends an email to the user.
+        """
+        user = self.context.get("user")
+        if user:
+            # Only send email if user exists (after validation)
+            token_generator = PasswordResetTokenGenerator()
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
+
+            # Construct the reset link (Frontend needs to handle this base URL)
+            # For testing, you might need a placeholder or a mock URL.
+            # In a real app, this would be a link to your frontend's password reset page
+            # e.g., f"https://example.com/reset-password/{uid}/{token}/"
+
+            # Placeholder URL
+            reset_link = (
+                f"http://127.0.0.1:8000/api/auth/password-reset-confirm/{uid}/{token}/"
+            )
+
+            # Render email content (you'll create this template)
+            email_subject = PASSWORD_RESET_SUBJECT
+            email_body = render_to_string(
+                "accounts/password_reset_email.html",
+                {
+                    "user": user,
+                    "reset_link": reset_link,
+                    "domain": "127.0.0.1:8000",
+                    "uid": uid,
+                    "token": token,
+                },
+            )
+
+            email = EmailMessage(
+                email_subject, email_body, settings.DEFAULT_FROM_EMAIL, [user.email]
+            )
+            email.send()
+
+        # Always returns success to prevent email enumeration, even if user doesn't exist
+        return True
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for confirming a password reset.
+    Takes uid (user ID), token, new_password1, and new_password2.
+    """
+
+    uid = serializers.CharField(required=True)
+    token = serializers.CharField(required=True)
+    new_password1 = serializers.CharField(required=True, write_only=True)
+    new_password2 = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        # Validate that new password match
+        if data["new_password1"] != data["new_password2"]:
+            raise serializers.ValidationError(
+                {"new_password2": PasswordMessasges.NOT_MATCH}
+            )
+
+        # Decode UID and get user
+        try:
+            # INPORTANT: urlsafe_base64_decode is used to conver the base64 encoded UID
+            # back to its original form (bytes), then force_str to convert to string.
+            uid = force_str(urlsafe_base64_decode(data["uid"]))
+            user = User._default_manager.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            raise serializers.ValidationError(
+                {"uid": PasswordMessasges.INVALID_UID_OR_NO_USER}
+            )
+
+        # Validate the token
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, data["token"]):
+            raise serializers.ValidationError(
+                {"token": PasswordMessasges.RESET_LINK_EXPIRED}
+            )
+
+        # Apply Django's password validators to the new password
+        try:
+            validate_password(data["new_password1"], user)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({"new_password1": list(e)})
+
+        # Store the user object in context for the save method
+        self.context["user"] = user
+        return data
+
+    def save(self, **kwargs):
+        """
+        Sets the new password for the user after successful validation.
+        """
+        user = self.context["user"]
         user.set_password(self.validated_data["new_password1"])
         user.save()
         return user
