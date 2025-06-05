@@ -3,7 +3,11 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .constants import PASSWORD_RESET_MESSAGE, PasswordMessasges
+from .constants import (
+    PASSWORD_RESET_MESSAGE,
+    AccountsMessages,
+    PasswordMessasges,
+)
 from .serializers import (
     ChangePasswordSerializer,
     PasswordResetConfirmSerializer,
@@ -103,3 +107,27 @@ class PasswordResetConfirmView(APIView):
                 {"detail": PasswordMessasges.RESET_CONFIRM}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDeactivateView(APIView):
+    """
+    API view for an authenticated user to deactivate their own account (soft delete).
+    Sets is_active to False.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_active:
+            return Response(
+                {"detail": AccountsMessages.ALREADY_INACTIVE},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.is_active = False
+        user.save()
+
+        return Response(
+            {"detail": AccountsMessages.DEACTIVATED},
+            status=status.HTTP_204_NO_CONTENT,
+        )
