@@ -1,4 +1,5 @@
 from bookings.models import Booking, BookingItem
+from bookings.serializers import BookingSerializer
 from common.choices import BookingStatus
 from django.db import transaction
 from django.db.models import F
@@ -10,6 +11,7 @@ from rest_framework.views import APIView
 
 
 class BookingCancelView(APIView):
+    serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, pk):
