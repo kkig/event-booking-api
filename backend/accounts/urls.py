@@ -6,6 +6,7 @@ from .views import (
     PasswordResetConfirmView,
     PasswordResetRequestView,
     RegisterView,
+    UserDeactivateView,
     UserProfileView,
 )
 
@@ -32,5 +33,8 @@ urlpatterns = [
         rf"password-reset-confirm/{reset_url_pattern}",
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
+    ),
+    path(
+        "deactivate-account/", UserDeactivateView.as_view(), name="deactivate_account"
     ),
 ]

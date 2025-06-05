@@ -9,6 +9,11 @@ class PasswordMessasges:
     NOT_MATCH = "New passwords do not match."
 
 
+class AccountsMessages:
+    DEACTIVATED = "Account deactivated successfully."
+    ALREADY_INACTIVE = "Account is already inactive."
+
+
 # Email
 PASSWORD_RESET_SUBJECT = "Password Reset Request"
 PASSWORD_RESET_MESSAGE = (
