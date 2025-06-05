@@ -117,9 +117,7 @@ def test_deactivate_already_inactive_account(api_client, organizer_factory, mock
     )
 
     # Attempt to deactivate the account
-    print(f"DEBUG: Attempting to deactivate URL: {DEACTIVATE_URL}")
     response = api_client.delete(DEACTIVATE_URL)
-    print(f"DEBUG: Response status: {response.status_code}, data: {response.data}")
 
     # Assert the expected 400 response
     assert response.status_code == status.HTTP_400_BAD_REQUEST

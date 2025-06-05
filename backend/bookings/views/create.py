@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 
 class BookingCreateView(APIView):
+    serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

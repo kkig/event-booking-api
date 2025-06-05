@@ -48,6 +48,7 @@ class ChangePasswordView(APIView):
     Requires authentication.
     """
 
+    serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -72,6 +73,8 @@ class PasswordResetRequestView(APIView):
     API view to request a password reset email.
     """
 
+    serializer_class = PasswordResetRequestSerializer
+
     # Allow unauthenticated users to request reset
     permission_classes = [permissions.AllowAny]
 
@@ -94,6 +97,7 @@ class PasswordResetConfirmView(APIView):
     API view to confirm a password reset with UID and token.
     """
 
+    serializer_class = PasswordResetConfirmSerializer
     # Allow unauthenticated users to confirm reset
     permission_classes = [permissions.AllowAny]
 
@@ -115,6 +119,7 @@ class UserDeactivateView(APIView):
     Sets is_active to False.
     """
 
+    serializer_class = None
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
