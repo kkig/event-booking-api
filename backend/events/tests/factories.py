@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import factory
 from common.choices import EventStatus
-from common.tests.factories import UserFactory
+from common.tests.factories import OrganizerFactory
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from events.models import Event, TicketType
@@ -14,7 +14,7 @@ class EventFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Event
 
-    organizer = factory.SubFactory(UserFactory)
+    organizer = factory.SubFactory(OrganizerFactory)
     name = factory.Sequence(lambda n: f"Test Event {n}")
     description = factory.Faker("paragraph")
     location = factory.Faker("city")
@@ -32,7 +32,7 @@ class TicketTypeFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Ticket {n}")
     description = "General Admission"
     price = factory.Faker(
-        "pydecimal", left_digits=2, right_digits=2, min_value=10, max_value=200
+        "pydecimal", left_digits=5, right_digits=2, min_value=10, max_value=200
     )
     quantity_available = factory.Faker("pyint", min_value=10, max_value=100)
     quantity_sold = 0

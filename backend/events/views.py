@@ -18,7 +18,7 @@ class EventViewSet(viewsets.ModelViewSet):
     DELETE /{id}/   - Delete event by ID.
     """
 
-    queryset = Event.objects.all()
+    queryset = Event.objects.all().order_by("created_at")
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOrganizerOrReadOnly]
     filter_backends = [
@@ -37,7 +37,7 @@ class EventViewSet(viewsets.ModelViewSet):
     ordering_fields = ["start_time", "capacity", "created_at"]
 
     # Default odering
-    odering = ["start_time"]
+    ordering = ["start_time"]
 
     def perform_create(self, serializer):
         """Called on POST request."""
