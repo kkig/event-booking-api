@@ -165,9 +165,9 @@ def test_quantity_exceeds_ticket_type_availability(
     }
 
     response = attendee_client.post(CREATE_URL, payload, format="json")
-    error_msg = f"Not enough tickets for {ticket.name}."
+    error_msg = f"Not enough tickets for: {ticket.name}."
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_msg in response.data["non_field_errors"][0]
+    assert error_msg in response.data
 
 
 @pytest.mark.django_db
@@ -209,4 +209,4 @@ def test_total_quantity_exceeds_event_capacity(
     response = attendee_client.post(CREATE_URL, payload, format="json")
     error_msg = BookingMessages.QUANTITY_EXCEED_CAPACITY
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_msg in response.data["non_field_errors"][0]
+    assert error_msg in response.data
