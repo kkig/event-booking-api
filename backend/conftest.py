@@ -1,10 +1,10 @@
 from datetime import timedelta
 
 import pytest
+from accounts.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
 
 # Import factories
 from bookings.tests.factories import BookingFactory, BookingItemFactory
-from common.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
 from django.utils import timezone
 from events.tests.factories import EventFactory, TicketTypeFactory
 from pytest_factoryboy import register

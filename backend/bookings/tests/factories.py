@@ -1,7 +1,7 @@
 import factory
+from accounts.tests.factories import UserFactory
 from bookings.models import Booking, BookingItem
 from common.choices import BookingStatus
-from common.tests.factories import UserFactory
 from events.tests.factories import EventFactory, TicketTypeFactory
 
 
