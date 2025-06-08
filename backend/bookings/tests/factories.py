@@ -11,7 +11,7 @@ class BookingFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     event = factory.SubFactory(EventFactory)
-    status = BookingStatus.PENDING
+    status = BookingStatus.CONFIRMED
 
 
 class BookingItemFactory(factory.django.DjangoModelFactory):
