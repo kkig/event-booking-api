@@ -1,23 +1,35 @@
 from bookings.serializers import BookingSerializer
+from django.urls import reverse
 from rest_framework.exceptions import ValidationError
 
+CREATE_URL = reverse("bookings:booking-create")
 
-def _attempt_booking(user, booking_data, success_list, error_list):
-    """
-    Attempt to create a booking for the given user and data.
-    Appends to `success_list` or `error_list` depending on the outcome.
-    """
-    # Simulate request context
-    request = type("Request", (), {"user": user})()
-    context = {"request": request}
 
-    serializer = BookingSerializer(data=booking_data, context=context)
+def simulate_booking_request(user, data, api_client):
+    request = api_client.post("/fake-booking/", data, format="json")
+    request.user = user
+    serializer = BookingSerializer(data=data, context={"request": request})
 
     if serializer.is_valid():
         try:
             serializer.save()
-            success_list.append(user.username)
-        except ValidationError as e:
-            error_list.append((user.username, str(e)))
+            return "success"
+
+        except ValidationError:
+            return "failed"
+
     else:
-        error_list.append((user.username, serializer.errors))
+        return "invalid"
+
+
+def threaded_booking(user, data, label, results, api_client):
+    result = simulate_booking_request(user, data, api_client)
+    results[label] = result
+
+
+def api_booking_attempt(client, event_id, ticket_type_id, quantity):
+    payload = {
+        "event_id": event_id,
+        "items": [{"ticket_type_id": ticket_type_id, "quantity": quantity}],
+    }
+    return client.post(CREATE_URL, payload, format="json")
