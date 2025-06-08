@@ -1,3 +1,4 @@
+from accounts.permissions import IsAttendee
 from bookings.serializers import BookingSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 
 class BookingCreateView(APIView):
     serializer_class = BookingSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAttendee]
 
     def post(self, request):
         serializer = BookingSerializer(data=request.data, context={"request": request})

@@ -1,7 +1,7 @@
 import factory
+from accounts.tests.factories import UserFactory
 from bookings.models import Booking, BookingItem
 from common.choices import BookingStatus
-from common.tests.factories import UserFactory
 from events.tests.factories import EventFactory, TicketTypeFactory
 
 
@@ -11,7 +11,7 @@ class BookingFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     event = factory.SubFactory(EventFactory)
-    status = BookingStatus.PENDING
+    status = BookingStatus.CONFIRMED
 
 
 class BookingItemFactory(factory.django.DjangoModelFactory):

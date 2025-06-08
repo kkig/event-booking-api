@@ -1,8 +1,8 @@
 from datetime import timedelta
 
 import factory
+from accounts.tests.factories import OrganizerFactory
 from common.choices import EventStatus
-from common.tests.factories import OrganizerFactory
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from events.models import Event, TicketType

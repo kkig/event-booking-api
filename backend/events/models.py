@@ -19,6 +19,14 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def total_tickets_sold(self):
+        try:
+            return sum(tt.quantity_sold for tt in self.ticket_types.all())  # type: ignore[attr-defined]
+        except Exception as e:
+            print(f"Error fetching ticket_types: {e}")
+            return 0
+
     def __str__(self):
         return self.name
 
@@ -35,13 +43,6 @@ class TicketType(models.Model):
     quantity_available = models.PositiveIntegerField()
     quantity_sold = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        # On creation, default quantity_sold to 0
-        if not self.pk:
-            self.quantity_sold = 0
-        # Execute DB write
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.event.name} - {self.name}"

@@ -1,13 +1,14 @@
 from datetime import timedelta
 
 import pytest
+from accounts.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
 
 # Import factories
 from bookings.tests.factories import BookingFactory, BookingItemFactory
-from common.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
 from django.utils import timezone
 from events.tests.factories import EventFactory, TicketTypeFactory
 from pytest_factoryboy import register
+from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
 # === Register the factories as fixtures ===
@@ -35,9 +36,15 @@ def api_client():
     """
     Base DRF APIClient without authentication.
     """
-    from rest_framework.test import APIClient
-
     return APIClient()
+
+
+@pytest.fixture
+def api_client_factory():
+    def _create():
+        return APIClient()
+
+    return _create
 
 
 @pytest.fixture

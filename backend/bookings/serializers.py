@@ -1,97 +1,124 @@
+from bookings.constants import BookingMessages
 from common.choices import BookingStatus
-from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import F, Sum
-from events.models import TicketType
+from django.db.models import F
+from events.models import Event, TicketType
 from rest_framework import serializers
 
 from .models import Booking, BookingItem
 
 
-class BookingSerializer(serializers.Serializer):
-    # Field level validation
-    # Required fields for booking request
-    event_id = serializers.IntegerField()
+class BookingItemInputSerializer(serializers.Serializer):
     ticket_type_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value=1)
 
+
+class BookingSerializer(serializers.Serializer):
+    """
+    Create new booking for an event after input validations.
+    """
+
+    # Field level validations
+    # A booking can have many ticket types (e.g., Standard, Premium)
+    event_id = serializers.IntegerField()
+    items = BookingItemInputSerializer(many=True)
+
     def validate(self, data):
-        """Object level validation. Do cross-field or context-aware checks."""
-        try:
-            # Django will SQL JOIN TicketType and event(FK) beforehand
-            # Get TicketType and event(FK) in one query
-            ticket_type = TicketType.objects.select_related("event").get(
-                id=data["ticket_type_id"]
-            )
-        except TicketType.DoesNotExist:
-            raise serializers.ValidationError("Ticket type does not exist.")
+        """
+        Lightweight validation. Non-concurrent sensitive.
+        - Ticket types exist
+        - Belong to the same event
+        """
+        event_id = data["event_id"]
+        items = data["items"]
 
-        # Prevents from booking a ticket for wrong event
-        if ticket_type.event.pk != data["event_id"]:
-            raise serializers.ValidationError(
-                "Ticket type does not belong to the specified event."
-            )
+        # Get array of all ticket type ids
+        ticket_type_ids = [item["ticket_type_id"] for item in items]
+        self._ticket_type_ids = ticket_type_ids
 
-        # Check availability - pre-check and avoids DB work
-        if ticket_type.quantity_available < data["quantity"]:
-            raise serializers.ValidationError("Not enough tickets available.")
-
-        # Check event capacity
-        event = ticket_type.event
-        total_sold = (
-            TicketType.objects.filter(event=event).aggregate(
-                total=Sum("quantity_sold")
-            )["total"]
-            or 0
+        # Get array of ticket type data from database
+        # Django will SQL JOIN TicketType and event(FK) beforehand
+        ticket_types = TicketType.objects.filter(id__in=ticket_type_ids).select_related(
+            "event"
         )
-        if total_sold + data["quantity"] > event.capacity:
-            raise serializers.ValidationError(
-                "Booking this quantity would exceed the event's capacity."
-            )
+
+        # Make sure all ticket types are available in database
+        if len(ticket_types) != len(items):
+            raise serializers.ValidationError(BookingMessages.INVALID_TICKET_TYPE)
+
+        # All ticket types should be for the same event
+        for tt in ticket_types:
+            if tt.event.pk != event_id:
+                raise serializers.ValidationError(
+                    BookingMessages.INVALID_BOOK_FOR_EVENTS
+                )
+
+        self._event = ticket_types[0].event
 
         return data
 
     def create(self, validated_data):
-        """Called after object validation."""
+        """
+        Called after object validation.
+        """
         user = self.context["request"].user
-        quantity = validated_data["quantity"]
-        ticket_type_id = validated_data["ticket_type_id"]
+        items = validated_data["items"]
+        ticket_type_ids = self._ticket_type_ids
+        event = self._event
+
+        total_requested = sum(item["quantity"] for item in items)
 
         # Complete successfully or do nothing (atomicity)
         with transaction.atomic():
             # Row locking for concurrency (pessimistic lock)
             # Prevents race conditions
-            ticket_type = TicketType.objects.select_for_update().get(id=ticket_type_id)
-            event = ticket_type.event
 
-            # Re-check capacity inside transaction to prevent race conditions
-            total_sold = (
-                TicketType.objects.select_for_update()
-                .filter(event=event)
-                .aggregate(total=Sum("quantity_sold"))["total"]
-                or 0
+            # Lock all ticket types
+            locked_ticket_types = TicketType.objects.select_for_update().filter(
+                id__in=ticket_type_ids
             )
-            if total_sold + quantity > event.capacity:
-                raise ValidationError("Booking this would exceed the event's capacity.")
+            # Make mapping of ticket type id to its data
+            ticket_map = {tt.pk: tt for tt in locked_ticket_types}
 
-            # Check availability (2nd) - critical check for consistency
-            if ticket_type.quantity_available < quantity:
-                raise ValidationError("Not enough tickets available.")
+            # Refresh event from DB with up-to-date ticket counts
+            event = Event.objects.select_for_update().get(pk=event.pk)
+            total_sold = event.total_tickets_sold
 
-            ticket_type.quantity_available = F("quantity_available") - quantity
-            ticket_type.quantity_sold = F("quantity_sold") + quantity
-            ticket_type.save()
+            # Make sure total quantity requested don't exceed event capacity
+            if total_sold + total_requested > event.capacity:
+                raise serializers.ValidationError(
+                    BookingMessages.QUANTITY_EXCEED_CAPACITY
+                )
 
+            # Make sure requested ticket type quantity don't exceed its availability
+            for item in items:
+                tt = ticket_map[item["ticket_type_id"]]
+                quantity = item["quantity"]
+
+                if tt.quantity_available < quantity:
+                    raise serializers.ValidationError(
+                        f"Not enough tickets for: {tt.name}."
+                    )
+
+            # Create booking
             booking = Booking.objects.create(
-                user=user,
-                event_id=validated_data["event_id"],
-                status=BookingStatus.CONFIRMED,
+                user=user, event=event, status=BookingStatus.CONFIRMED
             )
 
-            BookingItem.objects.create(
-                booking=booking, ticket_type=ticket_type, quantity=quantity
-            )
+            # Create items & update ticket counts
+            for item in items:
+                tt = ticket_map[item["ticket_type_id"]]
+                quantity = item["quantity"]
 
+                tt.quantity_available = F("quantity_available") - quantity
+                tt.quantity_sold = F("quantity_sold") + quantity
+                tt.save()
+                # Create item
+                BookingItem.objects.create(
+                    booking=booking,
+                    ticket_type=tt,
+                    quantity=quantity,
+                )
         return booking
 
 

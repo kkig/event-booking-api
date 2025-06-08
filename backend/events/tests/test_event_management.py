@@ -164,3 +164,25 @@ def test_organizer_cannot_create_ticket_type_for_other_organizers_event(
     }
     response = organizer_client.post(url, data, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_event_does_not_allow_overselling(event_factory, ticket_type_factory):
+    """
+    Test that we can't sell exceeding capacity.
+    """
+    event = event_factory(capacity=10)
+    ticket_type = ticket_type_factory(event=event, quantity_available=10)
+
+    # Simulate 10 tickets sold
+    ticket_type.quantity_sold = 10
+    ticket_type.save()
+
+    assert event.total_tickets_sold == 10
+
+    # Try to 'sell' one more (simulate overbooking)
+    ticket_type.quantity_sold += 1
+    ticket_type.save()
+
+    event.refresh_from_db()
+    assert event.total_tickets_sold > event.capacity

@@ -1,22 +1,28 @@
+from accounts.permissions import IsAttendee
 from bookings.models import Booking, BookingItem
-from bookings.serializers import BookingSerializer
 from common.choices import BookingStatus
 from django.db import transaction
 from django.db.models import F
-from django.shortcuts import get_object_or_404
 from events.models import TicketType
-from rest_framework import permissions, status
+from rest_framework import status
+from rest_framework.generics import UpdateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 
-class BookingCancelView(APIView):
-    serializer_class = BookingSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class BookingCancelView(UpdateAPIView):
+    serializer_class = None
+    permission_classes = [IsAuthenticated, IsAttendee]
+    lookup_field = "pk"
 
-    def put(self, request, pk):
-        "Cancel specified booking."
-        booking = get_object_or_404(Booking, pk=pk, user=request.user)
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        """
+        Cancel specified booking.
+        """
+        booking = self.get_object()
 
         if booking.status != BookingStatus.CONFIRMED:
             return Response(
