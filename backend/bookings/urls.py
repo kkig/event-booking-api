@@ -1,4 +1,4 @@
-from bookings.views.update import BookingCancelView
+from bookings.views.cancel import BookingCancelView
 from django.urls import path
 
 from .views import BookingCreateView, BookingDetailView, BookingListView

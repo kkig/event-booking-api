@@ -1,13 +1,15 @@
+from accounts.permissions import IsAttendee
 from bookings.filters import BookingFilter
 from bookings.models import Booking
 from bookings.serializers import BookingDetailSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 
 
-class BookingListView(generics.ListAPIView):
+class BookingListView(ListAPIView):
     serializer_class = BookingDetailSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAttendee]
     filter_backends = [DjangoFilterBackend]
     filterset_class = BookingFilter
 

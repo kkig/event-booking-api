@@ -1,3 +1,4 @@
+from accounts.permissions import IsAttendee
 from bookings.models import Booking
 from bookings.serializers import BookingDetailSerializer
 from rest_framework.generics import RetrieveAPIView
@@ -7,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 class BookingDetailView(RetrieveAPIView):
     serializer_class = BookingDetailSerializer
 
-    # Avoid returning 403 - it prove that the given booking id exists
-    permission_classes = [IsAuthenticated]
+    # Avoid returning 403 to attendees - it prove that the given booking id exists
+    permission_classes = [IsAuthenticated, IsAttendee]
 
     def get_queryset(self):
         """
