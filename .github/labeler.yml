@@ -1,18 +1,24 @@
-features:
-  - "jobs/**"
-  - "analytics/**"
+labels:
+  - label: features
+    paths:
+      - jobs/**
+      - analytics/**
 
-bugfix:
-  - "fixes/**"
-  - "**/bug_*"
+  - label: bugfix
+    paths:
+      - fixes/**
+      - "**/bug_*"
 
-docs:
-  - "*.md"
-  - "docs/**"
+  - label: docs
+    paths:
+      - "*.md"
+      - docs/**
 
-chore:
-  - ".github/**"
-  - ".pre-commit-config.yaml"
+  - label: chore
+    paths:
+      - .github/**
+      - .pre-commit-config.yaml
 
-refactor:
-  - "*/refactor_*"
+  - label: refactor
+    paths:
+      - "*/refactor_*"
