@@ -25,8 +25,6 @@ def test_can_make_booking(attendee_client, event_factory, ticket_type_factory):
 
 
 # === Input validation ===
-
-
 @pytest.mark.django_db
 def test_reject_no_ticket_type(attendee_client, event_factory):
     event = event_factory(capacity=10)
@@ -68,8 +66,6 @@ def test_reject_negative_ticket_quantity(
 
 
 # === Serializer validation ===
-
-
 @pytest.mark.django_db
 def test_booking_with_multiple_ticket_types(
     attendee_client, event_factory, ticket_type_factory
