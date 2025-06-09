@@ -76,7 +76,7 @@ def jwt_authenticated_client(api_client, user_factory):
     user = user_factory.create()
     access_token = str(AccessToken.for_user(user))
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
-    api_client.user = user  # Attach user for convinience
+    api_client.user = user  # Attach user for convenience
     return api_client
 
 
@@ -88,7 +88,7 @@ def jwt_organizer_client(api_client, organizer_factory):
     organizer = organizer_factory.create()
     access_token = str(AccessToken.for_user(organizer))
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
-    api_client.user = organizer  # Attach user for convinience
+    api_client.user = organizer  # Attach user for convenience
     return api_client
 
 

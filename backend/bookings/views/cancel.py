@@ -3,8 +3,10 @@ from bookings.models import Booking, BookingItem
 from common.choices import BookingStatus
 from django.db import transaction
 from django.db.models import F
+from django.shortcuts import get_object_or_404
 from events.models import TicketType
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -13,10 +15,21 @@ from rest_framework.response import Response
 class BookingCancelView(UpdateAPIView):
     serializer_class = None
     permission_classes = [IsAuthenticated, IsAttendee]
-    lookup_field = "pk"
+    queryset = Booking.objects.all()
 
-    def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user)
+    def get_object(self):
+        booking = get_object_or_404(
+            Booking.objects.filter(user=self.request.user).prefetch_related(
+                "items__ticket_type"
+            ),
+            # From URL parameters
+            pk=self.kwargs.get("pk"),
+        )
+
+        if booking.status != BookingStatus.CONFIRMED:
+            raise ValidationError("Booking already cancelled or invalid status.")
+
+        return booking
 
     def update(self, request, *args, **kwargs):
         """
@@ -24,21 +37,13 @@ class BookingCancelView(UpdateAPIView):
         """
         booking = self.get_object()
 
-        if booking.status != BookingStatus.CONFIRMED:
-            return Response(
-                {"detail": "Booking already cancelled or invalid status."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         with transaction.atomic():
             # Update booking status
             booking.status = BookingStatus.CANCELLED
             booking.save()
 
             # Get all booking items for a booking
-            items = BookingItem.objects.filter(booking=booking).select_related(
-                "ticket_type"
-            )
+            items = BookingItem.objects.filter(booking=booking)
 
             # Update ticket availability for each booking item
             for item in items:

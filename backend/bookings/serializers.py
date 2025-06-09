@@ -34,7 +34,6 @@ class BookingSerializer(serializers.Serializer):
 
         # Get array of all ticket type ids
         ticket_type_ids = [item["ticket_type_id"] for item in items]
-        self._ticket_type_ids = ticket_type_ids
 
         # Get array of ticket type data from database
         # Django will SQL JOIN TicketType and event(FK) beforehand
@@ -53,7 +52,8 @@ class BookingSerializer(serializers.Serializer):
                     BookingMessages.INVALID_BOOK_FOR_EVENTS
                 )
 
-        self._event = ticket_types[0].event
+        data["ticket_type_ids"] = ticket_type_ids
+        data["event"] = ticket_types[0].event
 
         return data
 
@@ -63,8 +63,8 @@ class BookingSerializer(serializers.Serializer):
         """
         user = self.context["request"].user
         items = validated_data["items"]
-        ticket_type_ids = self._ticket_type_ids
-        event = self._event
+        ticket_type_ids = validated_data["ticket_type_ids"]
+        event = validated_data["event"]
 
         total_requested = sum(item["quantity"] for item in items)
 
@@ -77,6 +77,7 @@ class BookingSerializer(serializers.Serializer):
             locked_ticket_types = TicketType.objects.select_for_update().filter(
                 id__in=ticket_type_ids
             )
+
             # Make mapping of ticket type id to its data
             ticket_map = {tt.pk: tt for tt in locked_ticket_types}
 
