@@ -51,7 +51,7 @@ def test_deactivate_account_success(api_client, organizer_factory):
     login_fail_response = api_client.post(LOGIN_URL, login_data, format="json")
     assert login_fail_response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    # Try to access profile with deactivated account (Shoud fail or result in 401 with old token)
+    # Try to access profile with deactivated account (Should fail or result in 401 with old token)
     # Re-set credentials with the old token, which should now be invalid because user is inactive
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     profile_response = api_client.get(USER_PROFILE_URL)
@@ -72,7 +72,7 @@ def test_deactivate_account_unauthenticated(api_client):
 @pytest.mark.django_db
 def test_deactivate_already_inactive_account(api_client, organizer_factory, mocker):
     """
-    Tests that attempting to deactivate an aleady inactive account returns a 400.
+    Tests that attempting to deactivate an already inactive account returns a 400.
     """
     user_email = "already_inactive@example.com"
     password = "AnotherSecurePassword123!"

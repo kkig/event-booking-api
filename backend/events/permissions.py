@@ -20,7 +20,7 @@ class IsOrganizerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """
-        Called when accessing a specific objec. (e.g., GET /events/42/)
+        Called when accessing a specific object. (e.g., GET /events/42/)
         """
         # Allow safe methods (GET, HEAD, OPTIONS)
         if request.method in permissions.SAFE_METHODS:

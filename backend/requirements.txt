@@ -5,6 +5,7 @@ certifi==2025.4.26
 cfgv==3.4.0
 charset-normalizer==3.4.2
 click==8.2.1
+codespell==2.4.1
 colorama==0.4.6
 coverage==7.8.2
 cssbeautifier==1.15.4

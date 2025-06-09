@@ -36,7 +36,7 @@ class EventViewSet(viewsets.ModelViewSet):
     # Allow sorting
     ordering_fields = ["start_time", "capacity", "created_at"]
 
-    # Default odering
+    # Default ordering
     ordering = ["start_time"]
 
     def perform_create(self, serializer):

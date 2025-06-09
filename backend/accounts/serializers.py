@@ -223,7 +223,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         # Decode UID and get user
         try:
-            # INPORTANT: urlsafe_base64_decode is used to conver the base64 encoded UID
+            # IMPORTANT: urlsafe_base64_decode is used to convert the base64 encoded UID
             # back to its original form (bytes), then force_str to convert to string.
             uid = force_str(urlsafe_base64_decode(data["uid"]))
             user = User._default_manager.get(pk=uid)

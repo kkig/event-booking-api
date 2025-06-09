@@ -132,8 +132,8 @@ def test_organizer_cannot_see_booking(organizer_client, booking_factory):
 
     assert organizer_client.user != booking.user
 
-    resopnse = organizer_client.get(url)
-    assert resopnse.status_code == status.HTTP_403_FORBIDDEN
+    response = organizer_client.get(url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 # === Test Cancel ===

@@ -62,7 +62,7 @@ def test_jwt_organizer_login_success(api_client, organizer_factory):
     """
     Tests successful JWT token obtainment with valid credentials for organizers.
     """
-    # Use a distict val for clarity
+    # Use a distinct val for clarity
     password = "TestPassword123!"
 
     # Factory generate the username and other default fields.
@@ -102,7 +102,7 @@ def test_jwt_attendee_login_success(api_client, attendee_factory):
     """
     Tests successful JWT token obtainment with valid credentials for attendees.
     """
-    # Use a distict val for clarity
+    # Use a distinct val for clarity
     password = "TestPassword123!"
 
     # Factory generate the username and other default fields.

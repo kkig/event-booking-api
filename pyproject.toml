@@ -15,3 +15,5 @@ line_length = 88
 known_first_party = ["apps", "config"]
 skip = ["migrations", "venv", ".venv", ".git"]
 
+[tool.codespell]
+skip = ["migrations", "venv", ".venv", ".git"]

@@ -291,7 +291,7 @@ def test_password_reset_confirm_token_used_twice(api_client, organizer_factory):
 def test_password_reset_confirm_token_expired(api_client, organizer_factory):
     """
     Tests that an expired password reset token cannot be used.
-    Nole: This test relies on manupulating the token generator's lifetime.
+    Nole: This test relies on manipulating the token generator's lifetime.
     For a real test, use a custom token generator or mock time.
     """
     pass

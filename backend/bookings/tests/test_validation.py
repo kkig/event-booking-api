@@ -107,7 +107,7 @@ def test_reject_multiple_entries_for_a_ticket_type(
     payload = {
         "event_id": event.id,
         "items": [
-            # Multiple entires for the same ticket type
+            # Multiple entries for the same ticket type
             {"ticket_type_id": ticket.id, "quantity": 2},
             {"ticket_type_id": ticket.id, "quantity": 1},
         ],
