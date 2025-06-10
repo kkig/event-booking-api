@@ -84,13 +84,40 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 
 ## API Endpoints Overview
 
-| Endpoint                        | Method | Description                    | Auth Required  |
-| ------------------------------- | ------ | ------------------------------ | -------------- |
-| `/api/bookings/`                | POST   | Create a new booking           | Yes (Attendee) |
-| `/api/bookings/{id}/cancel/`    | POST   | Cancel an existing booking     | Yes (Owner)    |
-| `/api/events/`                  | GET    | List active/upcoming events    | No             |
-| `/api/events/{id}/`             | GET    | Retrieve event details         | No             |
-| `/api/events/{id}/ticket-types` | GET    | List ticket types for an event | No             |
+### Accounts
+
+| Endpoint                                             | Method | Description                              | Auth Required |
+| ---------------------------------------------------- | ------ | ---------------------------------------- | ------------- |
+| `/api/auth/register/`                                | POST   | Create new account                       | No            |
+| `/api/auth/login/`                                   | POST   | Log in user                              | No            |
+| `/api/auth/token/refresh/`                           | POST   | Exchange access token with refresh token | No            |
+| `/api/auth/profile/`                                 | GET    | Retrieve details of the user             | Yes           |
+| `/api/auth/profile/`                                 | PUT    | Update details of the user               | Yes           |
+| `/api/auth/change-password/`                         | POST   | Reset password                           | Yes           |
+| `/api/auth/password-reset-request/`                  | POST   | Initiate password reset flow             | No            |
+| `/api/auth/password-reset-confirm/{uidb64}/{token}/` | POST   | Reset password                           | No            |
+| `/api/auth/deactivate-account/`                      | DELETE | Deactivate user account                  | Yes           |
+
+### Bookings
+
+| Endpoint                     | Method | Description                 | Auth Required  |
+| ---------------------------- | ------ | --------------------------- | -------------- |
+| `/api/bookings/`             | POST   | Create a new booking        | Yes (Attendee) |
+| `/api/bookings/{id}/`        | GET    | Retrieve details of booking | Yes (Owner)    |
+| `/api/bookings/{id}/cancel/` | PUT    | Cancel an existing booking  | Yes (Owner)    |
+| `/api/users/me/bookings/`    | GET    | List all bookings           | Yes (Owner)    |
+
+### Events
+
+| Endpoint                        | Method | Description                    | Auth Required   |
+| ------------------------------- | ------ | ------------------------------ | --------------- |
+| `/api/events/`                  | GET    | List active/upcoming events    | No              |
+| `/api/events/`                  | POST   | List active/upcoming events    | Yes (Organizer) |
+| `/api/events/{id}/`             | GET    | Retrieve event details         | No              |
+| `/api/events/{id}/`             | PUT    | Update event details           | Yes (Owner)     |
+| `/api/events/{id}/`             | DELETE | Delete event                   | Yes (Owner)     |
+| `/api/events/{id}/ticket-types` | GET    | List ticket types for an event | Yes (Owner)     |
+| `/api/events/{id}/ticket-types` | POST   | Create a ticket type for event | Yes (Owner)     |
 
 _Note: Authentication uses token-based auth (JWT) for securing endpoints._
 
@@ -117,6 +144,63 @@ To prevent overbooking under concurrent booking attempts:
 - Ticket types and events are locked with `select_for_update()` to ensure row-level locking.
 - Ticket availability and event capacity are checked and updated atomically.
 - Automated tests simulate concurrent booking attempts with multiple threads, ensuring that only one booking succeeds when capacity is limited.
+
+### Booking Flow
+
+[Mermaid sequence diagram](https://mermaid.live) that visualizes booking creation flow with concurrency control.
+
+<details>
+sequenceDiagram
+    participant A as Attendee
+    participant C as API Server
+    participant D as Database
+
+    A->>C: POST /api/bookings/
+    C->>C: Begin transaction.atomic()
+    C->>D: SELECT TicketType FOR UPDATE
+    C->>D: SELECT Event FOR UPDATE
+    C->>D: Check availability & capacity
+
+    alt Tickets Available
+        C->>D: Create Booking
+        C->>D: Set Booking status to CONFIRMED
+        C->>D: Decrement TicketType.quantity_available
+        C->>D: Increment TicketType.quantity_sold
+        C->>D: Commit Transaction
+        C-->>A: 201 Created (Booking Confirmed)
+    else Sold Out
+        C->>D: Rollback Transaction
+        C-->>A: 400 Bad Request (Sold Out)
+    end
+
+</details>
+
+### Booking Cancellation Flow
+
+[Mermaid sequence diagram](https://mermaid.live) that visualizes booking cancellation flow with concurrency control.
+
+<details>
+sequenceDiagram
+    participant A as Attendee
+    participant C as API Server
+    participant D as Database
+
+    A->>C: PUT /api/bookings/:id/
+    C->>C: Check auth and ownership
+    C->>D: Begin transaction.atomic()
+    C->>D: Lock Booking (SELECT ... FOR UPDATE)
+    C->>D: Check Booking status
+    alt Already cancelled
+        C-->>A: 400 Bad Request (already cancelled)
+    else Valid cancellation
+        C->>D: Update Booking status to CANCELLED
+        C->>D: Increment TicketType.quantity_available
+        C->>D: Decrement TicketType.quantity_sold
+        C->>D: Commit transaction
+        C-->>A: 200 OK (cancelled)
+    end
+
+</details>
 
 ## Running Tests
 
