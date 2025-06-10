@@ -210,6 +210,20 @@ Run tests inside the Docker container:
 docker-compose exec web pytest --maxfail=1 --disable-warnings -q
 ```
 
+### Concurrency Test Suite
+
+A key aspect of this API is its robust handling of concurrent booking requests. The test suite includes specific tests designed to validate the system's behavior under high-stress, simultaneous interactions.
+
+These tests utilize Python's `threading` module within Pytest to simulate multiple users attempting to book tickets concurrently. They ensure that:
+
+- **No Overbooking:** Even with multiple simultaneous requests, the system prevents tickets from being oversold beyond available capacity
+- **Race Condition Prevention:** Scenarios like two users attempting to book the very last available ticket are handled correctly, with only one request succeeding.
+- **Shared Capacity Management:** Tests cover situations where different ticket types contribute to a single event's overall capacity, ensuring accurate availability updates across types.
+- **Atomic Operations:** Verifies that critical operations (booking creation, quantity updates, cancellations) are atomic and concurrency-safe, leveraging PostgreSQL's row-level locking (`select_for_update()`) and Django's `transaction.atomic()` blocks.
+- **Cancellation Releasing Tickets:** Confirms that cancelling a booking correctly frees up ticket availability for other users to book immediately.
+
+These dedicated concurrency tests provide strong confidence in the API's reliability under real-world usage patterns.
+
 ## Makefile Commands
 
 This project includes a `Makefile` to simplify common development tasks:
