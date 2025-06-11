@@ -1,4 +1,6 @@
+from accounts.permissions import IsOrganizer
 from django_filters.rest_framework import DjangoFilterBackend
+from events.constants import EventMessages
 from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 
@@ -50,25 +52,40 @@ class TicketTypeViewSet(
     mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
 ):
     """
-    Handle GET/POST logic for the `TicketType`.
-
-    `list`(GET), `create`(POST)
+    Handle ticket types for an event.
+    GET /events/{event_pk}/ticket-types/ - List all ticket types for an event.
+    POST /events/{event_pk}/ticket-types/ - Create a new ticket type for an event.
     """
 
     serializer_class = TicketTypeSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrganizerOrReadOnly]
+
+    def get_permissions(self):
+        """
+        Set permissions based on action.
+        - List: Read-only for all users.
+        - Create: Only organizers can create ticket types.
+        """
+        if self.action == "list":
+            return [permissions.AllowAny()]
+        elif self.action == "create":
+            return [permissions.IsAuthenticated(), IsOrganizer()]
 
     def get_queryset(self):
-        """Called on list(GET) request."""
+        """
+        Return ticket types for the specific event.
+        """
         event_id = self.kwargs.get("event_pk")
-        return TicketType.objects.filter(event_id=event_id)
+        return TicketType.objects.filter(event_id=event_id).order_by("id")
 
     def perform_create(self, serializer):
-        """Called on create(POST) request."""
+        """
+        Called on POST request to create a new ticket type.
+        Ensures the user is the organizer of the event.
+        """
         event_id = self.kwargs.get("event_pk")
         event = Event.objects.get(pk=event_id)
 
         if event.organizer != self.request.user:
-            raise PermissionDenied("You are not the organizer of this event.")
+            raise PermissionDenied(EventMessages.NOT_EVENT_OWNER)
 
         serializer.save(event=event)
