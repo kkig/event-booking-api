@@ -12,7 +12,7 @@ def test_can_make_booking(attendee_client, event_factory, ticket_type_factory):
     """
     Test that request succeeds.
     """
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10)
 
     payload = {
@@ -27,7 +27,7 @@ def test_can_make_booking(attendee_client, event_factory, ticket_type_factory):
 # === Input validation ===
 @pytest.mark.django_db
 def test_reject_no_ticket_type(attendee_client, event_factory):
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
 
     payload = {"event_id": event.id}
 
@@ -37,7 +37,7 @@ def test_reject_no_ticket_type(attendee_client, event_factory):
 
 @pytest.mark.django_db
 def test_reject_no_event_id(attendee_client, event_factory, ticket_type_factory):
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10)
 
     payload = {"items": [{"ticket_type_id": ticket.id, "quantity": 1}]}
@@ -53,7 +53,7 @@ def test_reject_negative_ticket_quantity(
     """
     Test that request rejects negative ticket quantity.
     """
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10)
 
     payload = {
@@ -101,7 +101,7 @@ def test_reject_multiple_entries_for_a_ticket_type(
     """
     Test that request get rejected when there are multiple entries with the same ticket type.
     """
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10, name="Standard")
 
     payload = {
@@ -149,7 +149,7 @@ def test_reject_ticket_type_for_different_events(
 
 @pytest.mark.django_db
 def test_reject_invalid_ticket_type(attendee_client, event_factory):
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
 
     payload = {"event_id": event.id, "items": [{"ticket_type_id": 5, "quantity": 1}]}
 

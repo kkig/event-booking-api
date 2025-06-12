@@ -13,7 +13,7 @@ def test_event_creation(event_factory):
     assert event.name.startswith("Test Event")
     assert event.description is not None
     assert event.location is not None
-    assert event.capacity == 100
+    assert event.total_capacity == 100
     assert event.organizer.role == UserRole.ORGANIZER
     assert event.status == EventStatus.UPCOMING
 

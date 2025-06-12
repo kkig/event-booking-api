@@ -36,7 +36,7 @@ class EventViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "description"]
 
     # Allow sorting
-    ordering_fields = ["start_time", "capacity", "created_at"]
+    ordering_fields = ["start_time", "total_capacity", "created_at"]
 
     # Default ordering
     ordering = ["start_time"]

@@ -15,9 +15,8 @@ DUMMY_EVENT_DATA = {
     "name": "New Concert",
     "description": "A rock concert",
     "start_time": "2025-12-25T19:00:00Z",
-    "end_time": "2025-12-25T21:00:00Z",
     "location": "Stadium",
-    "capacity": 5000,
+    "total_capacity": 5000,
     "status": EventStatus.UPCOMING,
 }
 

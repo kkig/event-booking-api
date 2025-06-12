@@ -17,7 +17,7 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "start_time",
             "end_time",
-            "capacity",
+            "total_capacity",
             "status",
             "created_at",
             "updated_at",
@@ -36,6 +36,8 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "price",
             "quantity_sold",
             "quantity_available",
+            "is_active",
             "created_at",
+            "updated_at",
         ]
         read_only_fields = ["id", "created_at", "event"]
