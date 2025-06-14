@@ -20,7 +20,7 @@ class EventFactory(factory.django.DjangoModelFactory):
     location = factory.Faker("city")
     start_time = factory.LazyFunction(lambda: timezone.now() + timedelta(days=1))
     end_time = factory.LazyFunction(lambda: timezone.now() + timedelta(days=1, hours=2))
-    total_capacity = 100
+    total_capacity = factory.Faker("random_int", min=50, max=500)
     status = EventStatus.UPCOMING
 
 
@@ -30,10 +30,10 @@ class TicketTypeFactory(factory.django.DjangoModelFactory):
 
     event = factory.SubFactory(EventFactory)
     name = factory.Sequence(lambda n: f"Ticket {n}")
-    description = "General Admission"
+    description = factory.Faker("sentence")
     price = factory.Faker(
         "pydecimal", left_digits=5, right_digits=2, min_value=10, max_value=200
     )
-    quantity_available = factory.Faker("pyint", min_value=10, max_value=100)
+    quantity_available = factory.Faker("random_int", min=10, max=100)
     quantity_sold = 0
     is_active = True

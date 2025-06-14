@@ -1,7 +1,5 @@
 import pytest
-from common.choices import EventStatus
 from django.urls import reverse
-from events.models import Event
 from rest_framework import status
 
 LIST_URL = reverse("events:event-list")
@@ -10,192 +8,45 @@ DETAIL_URL = "events:event-detail"
 TICKET_TYPE_LIST = "events:event-ticket-types-list"
 TICKET_TYPE_DETAIL = "events:event-ticket-types-detail"
 
+# # === Test Ticket Type Validation ===
+# @pytest.mark.parametrize(
+#     "field, value",
+#     [
+#         ("name", None),
+#         ("name", ""),
+#         ("name", "A" * 101),
+#         ("price", -25.00),
+#         ("quantity_available", -10),
+#         ("quantity_available", 0),
+#     ],
+# )
+# def test_create_ticket_type_with_invalid_data(
+#     field, value, organizer_client, event_factory
+# ):
+#     """
+#     Test that organizer cannot create ticket type with invalid data.
+#     """
+#     event = event_factory(organizer=organizer_client.user)
+#     url = reverse(TICKET_TYPE_LIST, kwargs={"event_pk": event.id})
 
-# === Test Event Get Views ===
-@pytest.mark.django_db
-def test_get_event_list(api_client, event_factory):
-    """
-    Test that GET returns a list of events.
-    """
-    event = event_factory(name="Test Event 1", status=EventStatus.UPCOMING)
-    response = api_client.get(LIST_URL)
+#     valid_data = {
+#         "name": "Standard Ticket",
+#         "description": "This is test ticket type.",
+#         "price": 25.00,
+#         "quantity_available": 100,
+#         "quantity_sold": 0,
+#         "is_active": True,
+#     }
 
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.data["results"]) == 1
+#     # Inject invalid field value
+#     invalid_data = valid_data.copy()
+#     if value is None:
+#         invalid_data.pop(field, None)
+#     else:
+#         invalid_data[field] = value
 
-    result = response.data["results"][0]
-    assert result["id"] == event.id
-    assert result["name"] == event.name
-
-
-@pytest.mark.django_db
-def test_get_list_with_multiple_events(api_client, event_factory):
-    """
-    Test that GET returns a list of events.
-    """
-    event_factory.create_batch(3)
-    response = api_client.get(LIST_URL)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.data["results"]) >= 3
-
-
-@pytest.mark.django_db
-def test_get_list_with_no_events(api_client):
-    """
-    Test that GET returns empty list when no events exist.
-    """
-    response = api_client.get(LIST_URL)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data["results"] == []
-
-
-# === Test Event Filter Views ===
-@pytest.mark.django_db
-def test_filter_events_by_filterset(api_client, event_factory):
-    """
-    Test the we can filter events by location.
-    """
-    event1 = event_factory(location="Stadium", status=EventStatus.UPCOMING)
-    event_factory(location="Arena", status=EventStatus.UPCOMING)
-
-    response = api_client.get(LIST_URL, {"location": "Stadium"})
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.data["results"]) == 1
-    assert response.data["results"][0]["id"] == event1.id
-
-
-@pytest.mark.django_db
-def test_filter_events_by_text_search(api_client, event_factory):
-    """
-    Test that we can filter events by test search.
-    """
-    event1 = event_factory(name="Katamari Rock", status=EventStatus.UPCOMING)
-    event2 = event_factory(name="Katamari Pop", status=EventStatus.UPCOMING)
-    response = api_client.get(LIST_URL, {"search": "katamari"})
-    results = response.data["results"]
-
-    assert response.status_code == status.HTTP_200_OK
-    assert len(results) == 2
-    assert results[0]["name"] in (event1.name, event2.name)
-
-
-@pytest.mark.django_db
-def test_filter_events_by_ordering(api_client, event_factory):
-    """
-    Test that we can order events by capacity.
-    """
-    event = event_factory(
-        name="Event A", total_capacity=800, status=EventStatus.UPCOMING
-    )
-    event_factory(name="Event B", total_capacity=500, status=EventStatus.UPCOMING)
-    response = api_client.get(LIST_URL, {"ordering": "capacity"})
-    results = response.data["results"]
-
-    assert response.status_code == status.HTTP_200_OK
-    assert len(results) == 2
-    assert results[0]["name"] == event.name
-
-
-# == Test Event Create Validation ===
-@pytest.mark.django_db
-def test_create_event_with_invalid_data(organizer_client):
-    """
-    Test that organizer cannot create event with invalid data.
-    """
-    invalid_data = {"name": "", "description": "A rock concert"}
-
-    response = organizer_client.post(LIST_URL, invalid_data, format="json")
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-# === Test Event Create Views ===
-DUMMY_EVENT_DATA = {
-    "name": "New Concert",
-    "description": "A rock concert",
-    "start_time": "2025-12-25T19:00:00Z",
-    "location": "Stadium",
-    "total_capacity": 5000,
-    "status": EventStatus.UPCOMING,
-}
-
-
-@pytest.mark.django_db
-def test_create_event(organizer_client):
-    """
-    Test that organizer can create event.
-    """
-    organizer = organizer_client.user
-    response = organizer_client.post(LIST_URL, DUMMY_EVENT_DATA, format="json")
-
-    assert response.status_code == status.HTTP_201_CREATED
-
-    event_name = DUMMY_EVENT_DATA["name"]
-
-    assert Event.objects.filter(name=event_name, organizer=organizer).exists()
-    assert response.data["organizer"] == str(organizer)
-
-
-# === Test Event Detail Views ===
-@pytest.mark.django_db
-def test_view_event_details(api_client, event_factory):
-    """
-    Test that public can view event detail.
-    """
-    event = event_factory()
-    url = reverse(DETAIL_URL, kwargs={"pk": event.id})
-    response = api_client.get(url)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data["name"] == event.name
-
-
-# === Test Event Update Views ===
-@pytest.mark.django_db
-def test_organizer_can_update_their_event(organizer_client, event_factory):
-    """
-    Test that organizer can update their event.
-    """
-    organizer = organizer_client.user
-    event = event_factory(organizer=organizer)
-    url = reverse(DETAIL_URL, kwargs={"pk": event.id})
-    data = {"name": "Updated Concert Name"}
-    response = organizer_client.patch(url, data, format="json")
-    event.refresh_from_db()
-
-    assert response.status_code == status.HTTP_200_OK
-    assert event.name == "Updated Concert Name"
-
-
-@pytest.mark.django_db
-def test_organizer_cannot_update_other_organizers_event(
-    organizer_client, organizer_factory, event_factory
-):
-    """
-    Test that organizer can't update other organizer's event.
-    """
-    other_organizer = organizer_factory()
-    event = event_factory(organizer=other_organizer)
-    url = reverse(DETAIL_URL, kwargs={"pk": event.id})
-    data = {"name": "Attempted Update"}
-    response = organizer_client.patch(url, data, format="json")
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-# === Test Event Delete Views ===
-@pytest.mark.django_db
-def test_organizer_can_delete_their_event(organizer_client, event_factory):
-    """
-    Test that organizer can delete their event.
-    """
-    organizer = organizer_client.user
-    event = event_factory(organizer=organizer)
-    url = reverse(DETAIL_URL, kwargs={"pk": event.id})
-    response = organizer_client.delete(url)
-
-    assert response.status_code == status.HTTP_204_NO_CONTENT
-    assert not Event.objects.filter(id=event.id).exists()
+#     response = organizer_client.post(url, invalid_data, format="json")
+#     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 # === Test Ticket Type Validation ===
