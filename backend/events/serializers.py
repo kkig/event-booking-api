@@ -1,6 +1,6 @@
 from common.choices import EventStatus
 from django.utils import timezone
-from events.constants import EventMessages, EventTypeMessages
+from events.constants import EventMessages, TicketTypeMessages
 from rest_framework import serializers
 
 from .models import Event, TicketType
@@ -64,13 +64,22 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "price",
-            "quantity_sold",
             "quantity_available",
+            "quantity_sold",
             "is_active",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "event"]
+        read_only_fields = ["id", "event", "created_at", "updated_at"]
+
+    def validate_name(self, value):
+        event = self.context.get("event")
+
+        if event and TicketType.objects.filter(event=event, name=value).exists():
+            raise serializers.ValidationError(
+                TicketTypeMessages.DUPLICATE_NAME_FOR_THE_EVENT
+            )
+        return value
 
     def validate_quantity_available(self, value):
         """
@@ -78,6 +87,6 @@ class TicketTypeSerializer(serializers.ModelSerializer):
         """
         if self.instance is None and value < 1:
             raise serializers.ValidationError(
-                EventTypeMessages.INVALID_AVAILABILITY_ON_CREATE
+                TicketTypeMessages.INVALID_AVAILABILITY_ON_CREATE
             )
         return value

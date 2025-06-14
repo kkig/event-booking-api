@@ -77,6 +77,19 @@ class TicketTypeViewSet(
         event_id = self.kwargs.get("event_pk")
         return TicketType.objects.filter(event_id=event_id).order_by("id")
 
+    def get_serializer_context(self):
+        """
+        Pass event to serializer for validation and read-only logic.
+        """
+        context = super().get_serializer_context()
+        event_id = self.kwargs.get("event_pk")
+        if event_id:
+            try:
+                context["event"] = Event.objects.get(pk=event_id)
+            except Event.DoesNotExist:
+                context["event"] = None
+        return context
+
     def perform_create(self, serializer):
         """
         Called on POST request to create a new ticket type.

@@ -9,5 +9,6 @@ class EventMessages:
     INVALID_STATUS_ON_CREATE = f"Only '{EventStatus.UPCOMING}' events can be created."
 
 
-class EventTypeMessages:
+class TicketTypeMessages:
     INVALID_AVAILABILITY_ON_CREATE = "Quantity must be at least 1 when creating."
+    DUPLICATE_NAME_FOR_THE_EVENT = "This ticket name already exists for this event."
