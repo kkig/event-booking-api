@@ -86,7 +86,7 @@ class BookingSerializer(serializers.Serializer):
             total_sold = event.total_tickets_sold
 
             # Make sure total quantity requested don't exceed event capacity
-            if total_sold + total_requested > event.capacity:
+            if total_sold + total_requested > event.total_capacity:
                 raise serializers.ValidationError(
                     BookingMessages.QUANTITY_EXCEED_CAPACITY
                 )

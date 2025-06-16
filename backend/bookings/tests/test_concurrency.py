@@ -16,7 +16,7 @@ CREATE_URL = reverse("bookings:booking-create")
 def test_concurrent_booking_edge_case(
     attendee_factory, ticket_type_factory, event_factory, api_client_factory
 ):
-    event = event_factory(capacity=5)
+    event = event_factory(total_capacity=5)
     ticket_type = ticket_type_factory(event=event, quantity_available=5)
 
     # Create new clients
@@ -69,7 +69,7 @@ def test_concurrent_exact_last_ticket_booking(
     When 2 users try to book the last ticket for the same event,
     only one of them can make booking.
     """
-    event = event_factory(capacity=1)
+    event = event_factory(total_capacity=1)
     ticket_type = ticket_type_factory(
         event=event, quantity_available=1, quantity_sold=0
     )
@@ -108,7 +108,7 @@ def test_concurrent_shared_event_capacity(
     When 2 users try to book for the same event and that will exceed
     event capacity, only one of them can make booking.
     """
-    event = event_factory(capacity=5)
+    event = event_factory(total_capacity=5)
 
     standard = ticket_type_factory(event=event, quantity_available=5, name="Standard")
     vip = ticket_type_factory(event=event, quantity_available=5, name="VIP")
@@ -151,7 +151,7 @@ def test_concurrent_booking_after_cancellation(
     When user canceled booking, it should free up tickets
     and another user can to book the tickets.
     """
-    event = event_factory(capacity=2)
+    event = event_factory(total_capacity=2)
     ticket_type = ticket_type_factory(event=event, quantity_available=2)
 
     user1 = user_factory.create()
@@ -210,7 +210,7 @@ def test_simultaneous_booking_only_one_succeeds(
     Prevent overbooking when 2 users try to book for the same event
     at the same time.
     """
-    event = event_factory(capacity=2)
+    event = event_factory(total_capacity=2)
     ticket_type = ticket_type_factory(event=event, quantity_available=2)
 
     user1 = attendee_factory.create()

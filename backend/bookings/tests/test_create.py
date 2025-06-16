@@ -110,11 +110,11 @@ def test_quantity_equals_event_capacity(
     attendee_client, event_factory, ticket_type_factory
 ):
     event = event_factory()
-    ticket = ticket_type_factory(event=event, quantity_available=event.capacity)
+    ticket = ticket_type_factory(event=event, quantity_available=event.total_capacity)
 
     payload = {
         "event_id": event.id,
-        "items": [{"ticket_type_id": ticket.id, "quantity": event.capacity}],
+        "items": [{"ticket_type_id": ticket.id, "quantity": event.total_capacity}],
     }
 
     response = attendee_client.post(CREATE_URL, payload, format="json")
@@ -131,13 +131,13 @@ def test_total_quantity_exceeds_event_capacity(
 ):
     event = event_factory()
     ticket1 = ticket_type_factory(event=event)
-    ticket2 = ticket_type_factory(event=event, quantity_available=event.capacity)
+    ticket2 = ticket_type_factory(event=event, quantity_available=event.total_capacity)
 
     payload = {
         "event_id": event.id,
         "items": [
             {"ticket_type_id": ticket1.id, "quantity": 1},
-            {"ticket_type_id": ticket2.id, "quantity": event.capacity},
+            {"ticket_type_id": ticket2.id, "quantity": event.total_capacity},
         ],
     }
 

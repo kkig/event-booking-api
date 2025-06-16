@@ -11,7 +11,7 @@ CANCEL_BASE = "bookings:booking-cancel"
 # === Test Create ===
 @pytest.mark.django_db
 def test_attendee_can_make_booking(ticket_type_factory, event_factory, attendee_client):
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10)
 
     # Required fields for serializer
@@ -28,7 +28,7 @@ def test_attendee_can_make_booking(ticket_type_factory, event_factory, attendee_
 def test_organizer_cannot_make_booking(
     organizer_client, event_factory, ticket_type_factory
 ):
-    event = event_factory(capacity=10)
+    event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10)
 
     payload = {

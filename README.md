@@ -112,11 +112,11 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 | Endpoint                        | Method | Description                    | Auth Required   |
 | ------------------------------- | ------ | ------------------------------ | --------------- |
 | `/api/events/`                  | GET    | List active/upcoming events    | No              |
-| `/api/events/`                  | POST   | List active/upcoming events    | Yes (Organizer) |
+| `/api/events/`                  | POST   | Create events                  | Yes (Organizer) |
 | `/api/events/{id}/`             | GET    | Retrieve event details         | No              |
-| `/api/events/{id}/`             | PUT    | Update event details           | Yes (Owner)     |
+| `/api/events/{id}/`             | PATCH  | Update event details           | Yes (Owner)     |
 | `/api/events/{id}/`             | DELETE | Delete event                   | Yes (Owner)     |
-| `/api/events/{id}/ticket-types` | GET    | List ticket types for an event | Yes (Owner)     |
+| `/api/events/{id}/ticket-types` | GET    | List ticket types for an event | No              |
 | `/api/events/{id}/ticket-types` | POST   | Create a ticket type for event | Yes (Owner)     |
 
 _Note: Authentication uses token-based auth (JWT) for securing endpoints._
