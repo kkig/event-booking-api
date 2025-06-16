@@ -13,7 +13,7 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
     location = models.CharField(max_length=255)
-    total_capacity = models.IntegerField(validators=[MinValueValidator(1)])
+    total_capacity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     status = models.CharField(
         max_length=10, choices=EventStatus, default=EventStatus.UPCOMING
     )
@@ -46,10 +46,8 @@ class TicketType(models.Model):
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )
-    quantity_available = models.PositiveIntegerField(validators=[MinValueValidator(0)])
-    quantity_sold = models.PositiveIntegerField(
-        default=0, validators=[MinValueValidator(0)]
-    )
+    quantity_available = models.PositiveIntegerField()
+    quantity_sold = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
