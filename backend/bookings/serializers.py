@@ -91,7 +91,7 @@ class BookingSerializer(serializers.Serializer):
                     BookingMessages.QUANTITY_EXCEED_CAPACITY
                 )
 
-            # Make sure requested ticket type quantity don't exceed its availability
+            # Validate ticket availability and status
             for item in items:
                 tt = ticket_map[item["ticket_type_id"]]
                 quantity = item["quantity"]
@@ -100,10 +100,23 @@ class BookingSerializer(serializers.Serializer):
                     raise serializers.ValidationError(
                         f"Not enough tickets for: {tt.name}."
                     )
+                elif not tt.is_active:
+                    raise serializers.ValidationError(
+                        BookingMessages.INACTIVE_TICKET_TYPE
+                    )
+
+            # Calculate total price first
+            total_price = sum(
+                item["quantity"] * ticket_map[item["ticket_type_id"]].price
+                for item in items
+            )
 
             # Create booking
             booking = Booking.objects.create(
-                user=user, event=event, status=BookingStatus.CONFIRMED
+                user=user,
+                event=event,
+                status=BookingStatus.CONFIRMED,
+                total_price=total_price,
             )
 
             # Create items & update ticket counts
@@ -111,15 +124,17 @@ class BookingSerializer(serializers.Serializer):
                 tt = ticket_map[item["ticket_type_id"]]
                 quantity = item["quantity"]
 
-                tt.quantity_available = F("quantity_available") - quantity
-                tt.quantity_sold = F("quantity_sold") + quantity
-                tt.save()
-                # Create item
                 BookingItem.objects.create(
                     booking=booking,
                     ticket_type=tt,
                     quantity=quantity,
+                    price_at_booking=tt.price,  # Snapshot current price
                 )
+
+                tt.quantity_available = F("quantity_available") - quantity
+                tt.quantity_sold = F("quantity_sold") + quantity
+                tt.save()
+
         return booking
 
 
@@ -132,7 +147,7 @@ class BookingItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BookingItem
-        fields = ["id", "ticket_type_name", "quantity"]
+        fields = ["id", "ticket_type_name", "quantity", "price_at_booking"]
 
 
 class BookingDetailSerializer(serializers.ModelSerializer):
@@ -145,4 +160,12 @@ class BookingDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         # Fields we want in response
-        fields = ["id", "event_name", "status", "created_at", "items"]
+        fields = [
+            "booking_reference",
+            "event_name",
+            "status",
+            "created_at",
+            "updated_at",
+            "items",
+            "total_price",
+        ]

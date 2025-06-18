@@ -61,7 +61,10 @@ def test_attendee_can_get_own_booking_list(attendee_client, booking_factory):
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 1
-    assert booking.id == response.data["results"][0]["id"]
+    assert (
+        str(booking.booking_reference)
+        == response.data["results"][0]["booking_reference"]
+    )
 
 
 @pytest.mark.django_db
@@ -95,7 +98,9 @@ def test_organizer_cannot_get_booking_list(organizer_client, booking_factory):
 @pytest.mark.django_db
 def test_attendee_can_view_own_booking(attendee_client, booking_factory):
     booking = booking_factory(user=attendee_client.user)
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": booking.pk})
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
 
     assert attendee_client.user == booking.user
 
@@ -106,7 +111,9 @@ def test_attendee_can_view_own_booking(attendee_client, booking_factory):
 @pytest.mark.django_db
 def test_anon_user_cannot_see_booking(api_client, booking_factory):
     booking = booking_factory()
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": booking.pk})
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
 
     response = api_client.get(url)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -115,7 +122,9 @@ def test_anon_user_cannot_see_booking(api_client, booking_factory):
 @pytest.mark.django_db
 def test_attendee_cannot_see_others_booking(attendee_client, booking_factory):
     booking = booking_factory()
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": booking.pk})
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
 
     assert attendee_client.user != booking.user
 
@@ -128,7 +137,9 @@ def test_attendee_cannot_see_others_booking(attendee_client, booking_factory):
 @pytest.mark.django_db
 def test_organizer_cannot_see_booking(organizer_client, booking_factory):
     booking = booking_factory()
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": booking.pk})
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
 
     assert organizer_client.user != booking.user
 
@@ -140,7 +151,7 @@ def test_organizer_cannot_see_booking(organizer_client, booking_factory):
 @pytest.mark.django_db
 def test_attendee_can_cancel_booking(attendee_client, booking_factory):
     booking = booking_factory(user=attendee_client.user)
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking.id})
+    url = reverse(CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference})
 
     response = attendee_client.put(url)
     assert response.status_code == status.HTTP_200_OK
@@ -151,7 +162,7 @@ def test_attendee_cannot_cancel_others_booking(attendee_client, booking_factory)
     booking = booking_factory()
     assert booking.user != attendee_client.user
 
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking.id})
+    url = reverse(CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference})
     response = attendee_client.put(url)
 
     # The booking not found in this attendee requester's bookings
@@ -161,7 +172,7 @@ def test_attendee_cannot_cancel_others_booking(attendee_client, booking_factory)
 @pytest.mark.django_db
 def test_anon_cannot_cancel_booking(api_client, booking_factory):
     booking = booking_factory()
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking.id})
+    url = reverse(CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference})
     response = api_client.put(url)
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -172,7 +183,7 @@ def test_organizer_cannot_cancel_booking(organizer_client, booking_factory):
     booking = booking_factory()
     assert booking.user != organizer_client.user
 
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking.id})
+    url = reverse(CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference})
     response = organizer_client.put(url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN

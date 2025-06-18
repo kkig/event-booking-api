@@ -16,14 +16,16 @@ class BookingCancelView(UpdateAPIView):
     serializer_class = None
     permission_classes = [IsAuthenticated, IsAttendee]
     queryset = Booking.objects.all()
+    lookup_field = "booking_reference"  # Optional
 
     def get_object(self):
+        booking_reference = self.kwargs.get("booking_reference")
         booking = get_object_or_404(
             Booking.objects.filter(user=self.request.user).prefetch_related(
                 "items__ticket_type"
             ),
             # From URL parameters
-            pk=self.kwargs.get("pk"),
+            booking_reference=booking_reference,
         )
 
         if booking.status != BookingStatus.CONFIRMED:

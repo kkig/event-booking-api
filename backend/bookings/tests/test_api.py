@@ -11,17 +11,12 @@ CANCEL_BASE = "bookings:booking-cancel"
 # === Test List views ===
 @pytest.mark.django_db
 def test_user_get_result_list(attendee_client, booking_factory):
-    booking = booking_factory(user=attendee_client.user)
+    booking_factory(user=attendee_client.user, with_items=2)
+    booking_factory(user=attendee_client.user, with_items=1)
 
     response = attendee_client.get(LIST_URL)
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.data["results"]) == 1
-
-    result = response.data["results"][0]
-
-    assert booking.id == result["id"]
-    assert booking.event.name == result["event_name"]
-    assert booking.status == result["status"]
+    assert len(response.data["results"]) == 2
 
 
 @pytest.mark.django_db
@@ -35,21 +30,26 @@ def test_user_with_no_booking_get_empty_result(attendee_client):
 # === Test Retrieval views ===
 @pytest.mark.django_db
 def test_user_get_booking_detail(attendee_client, booking_factory):
-    booking = booking_factory(user=attendee_client.user)
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": booking.id})
+    booking = booking_factory(user=attendee_client.user, with_items=3)
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
 
     response = attendee_client.get(url)
     assert response.status_code == status.HTTP_200_OK
 
     result = response.data
-    assert result["id"] == booking.id
+    assert result["booking_reference"] == str(booking.booking_reference)
     assert result["event_name"] == booking.event.name
     assert result["status"] == booking.status
+    assert result["total_price"] == str(booking.total_price)
 
 
 @pytest.mark.django_db
 def test_user_with_no_booking_get_404(attendee_client):
-    url = reverse(RETRIEVE_BASE, kwargs={"pk": 9999})  # Non-existent booking ID
+    url = reverse(
+        RETRIEVE_BASE, kwargs={"booking_reference": 9999}
+    )  # Non-existent booking ID
 
     response = attendee_client.get(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -59,7 +59,7 @@ def test_user_with_no_booking_get_404(attendee_client):
 @pytest.mark.django_db
 def test_user_cancel_booking(attendee_client, booking_factory):
     booking = booking_factory(user=attendee_client.user, status=BookingStatus.CONFIRMED)
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking.id})
+    url = reverse(CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference})
 
     response = attendee_client.put(url)
     assert response.status_code == status.HTTP_200_OK
@@ -77,8 +77,10 @@ def test_user_cancel_will_update_ticket_availability(
         booking__user=attendee_client.user, ticket_type=ticket_type, quantity=2
     )
 
-    url = reverse(CANCEL_BASE, kwargs={"pk": booking_item.booking.id})
-    print("url:", url)
+    url = reverse(
+        CANCEL_BASE,
+        kwargs={"booking_reference": booking_item.booking.booking_reference},
+    )
 
     response = attendee_client.put(url)
     assert response.status_code == status.HTTP_200_OK

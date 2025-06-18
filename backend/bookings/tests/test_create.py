@@ -145,3 +145,29 @@ def test_total_quantity_exceeds_event_capacity(
     error_msg = BookingMessages.QUANTITY_EXCEED_CAPACITY
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_msg in response.data
+
+
+@pytest.mark.django_db
+def test_create_calcurate_total_price(
+    attendee_client, event_factory, ticket_type_factory
+):
+    event = event_factory(total_capacity=500)
+    ticket1 = ticket_type_factory(event=event, quantity_available=50)
+    ticket2 = ticket_type_factory(event=event, quantity_available=100)
+
+    payload = {
+        "event_id": event.id,
+        "items": [
+            {"ticket_type_id": ticket1.id, "quantity": 2},
+            {"ticket_type_id": ticket2.id, "quantity": 5},
+        ],
+    }
+
+    response = attendee_client.post(CREATE_URL, payload, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    total_price = ticket1.price * 2 + ticket2.price * 5
+    reference = response.data["booking_reference"]
+
+    booking = Booking.objects.get(booking_reference=reference)
+    assert booking.total_price == total_price
