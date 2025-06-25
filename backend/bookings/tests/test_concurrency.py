@@ -26,11 +26,9 @@ def test_concurrent_booking_edge_case(
 
     client1 = api_client_factory()
     client1.force_authenticate(user=user1)
-    client1.user = user1
 
     client2 = api_client_factory()
     client2.force_authenticate(user=user2)
-    client2.user = user2
 
     assert client1 != client2
 
@@ -145,7 +143,7 @@ def test_concurrent_shared_event_capacity(
 
 
 def test_concurrent_booking_after_cancellation(
-    user_factory, booking_factory, ticket_type_factory, event_factory, api_client
+    attendee_factory, booking_factory, ticket_type_factory, event_factory, api_client
 ):
     """
     When user canceled booking, it should free up tickets
@@ -154,12 +152,14 @@ def test_concurrent_booking_after_cancellation(
     event = event_factory(total_capacity=2)
     ticket_type = ticket_type_factory(event=event, quantity_available=2)
 
-    user1 = user_factory.create()
-    user2 = user_factory.create()
+    user1 = attendee_factory.create()
+    user2 = attendee_factory.create()
     assert user1 != user2
 
     booking1 = booking_factory(user=user1, event=event, status=BookingStatus.CONFIRMED)
-    booking1.items.create(ticket_type=ticket_type, quantity=2)
+    booking1.items.create(
+        ticket_type=ticket_type, quantity=2, price_at_booking=ticket_type.price
+    )
     assert Booking.objects.filter(status=BookingStatus.CONFIRMED).count() == 1
 
     # Simulate fully booked

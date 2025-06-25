@@ -60,7 +60,6 @@ class TicketTypeSerializer(serializers.ModelSerializer):
         model = TicketType
         fields = [
             "id",
-            "event",
             "name",
             "description",
             "price",

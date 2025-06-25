@@ -58,6 +58,7 @@ class TicketTypeViewSet(
     """
 
     serializer_class = TicketTypeSerializer
+    permission_classes = [permissions.IsAuthenticated]  # Default fallback
 
     def get_permissions(self):
         """
@@ -69,6 +70,7 @@ class TicketTypeViewSet(
             return [permissions.AllowAny()]
         elif self.action == "create":
             return [permissions.IsAuthenticated(), IsOrganizer()]
+        return super().get_permissions()  # fallback to permission_classes
 
     def get_queryset(self):
         """

@@ -1,12 +1,23 @@
 from bookings.serializers import BookingSerializer
 from django.urls import reverse
 from rest_framework.exceptions import ValidationError
+from rest_framework.test import APIClient
 
 CREATE_URL = reverse("bookings:booking-create")
 
 
+def authenticated_client(user):
+    """
+    Return an API client authenticated with a valid JWT access token.
+    This simulates a real JWT flow, processing headers via SimpleJWT's backend
+    """
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
+
+
 def simulate_booking_request(user, data, api_client):
-    request = api_client.post("/fake-booking/", data, format="json")
+    request = api_client.post(CREATE_URL, data, format="json")
     request.user = user
     serializer = BookingSerializer(data=data, context={"request": request})
 
