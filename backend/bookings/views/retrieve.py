@@ -10,6 +10,7 @@ class BookingDetailView(RetrieveAPIView):
 
     # Avoid returning 403 to attendees - it prove that the given booking id exists
     permission_classes = [IsAuthenticated, IsAttendee]
+    lookup_field = "booking_reference"
 
     def get_queryset(self):
         """

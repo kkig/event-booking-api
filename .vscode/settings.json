@@ -34,6 +34,7 @@
   "python.analysis.autoSearchPaths": true,
   "python.analysis.useLibraryCodeForTypes": true,
   "python.analysis.diagnosticSeverityOverrides": {
+    // "reportAttributeAccessIssue": "none",
     "reportPrivateImportUsage": "none",
     "reportUnusedVariable": "information",
     "reportOptionalSubscript": "none",

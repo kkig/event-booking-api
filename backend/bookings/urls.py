@@ -8,10 +8,14 @@ app_name = "bookings"
 
 urlpatterns = [
     path("users/me/bookings", BookingListView.as_view(), name="my-bookings"),
-    path(f"{url_prefix}<int:pk>", BookingDetailView.as_view(), name="booking-detail"),
+    path(
+        f"{url_prefix}<str:booking_reference>",
+        BookingDetailView.as_view(),
+        name="booking-detail",
+    ),
     path(f"{url_prefix}", BookingCreateView.as_view(), name="booking-create"),
     path(
-        f"{url_prefix}<int:pk>/cancel",
+        f"{url_prefix}<str:booking_reference>/cancel",
         BookingCancelView.as_view(),
         name="booking-cancel",
     ),

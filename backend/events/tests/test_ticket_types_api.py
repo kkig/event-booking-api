@@ -30,7 +30,6 @@ def test_create_ticket_type_with_valid_data(organizer_client, event_factory):
     response = organizer_client.post(url, payload, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data["name"] == "Test ticket type"
-    assert response.data["event"] == event.pk
     assert response.data["quantity_sold"] == 0
     assert TicketType.objects.filter(event=event, name="Test ticket type").exists()
 

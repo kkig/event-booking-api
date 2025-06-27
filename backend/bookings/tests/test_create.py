@@ -9,11 +9,11 @@ CREATE_URL = reverse("bookings:booking-create")
 
 # === Test logics to create booking ===
 @pytest.mark.django_db
-def test_attendees_booking_adds_to_database(
-    ticket_type_factory, event_factory, attendee_client
-):
-    event = event_factory()
-    ticket = ticket_type_factory.create(event=event)
+def test_attendees_booking_adds_to_database(event_factory, attendee_client):
+    event = event_factory(
+        total_capacity=500, with_ticket_types=[{"quantity_available": 20}]
+    )
+    ticket = event.ticket_types.all()[0]
 
     # Required fields for serializer
     payload = {
@@ -30,11 +30,12 @@ def test_attendees_booking_adds_to_database(
 
 
 @pytest.mark.django_db
-def test_booking_ticket_updates_ticket_type_quantity(
-    attendee_client, event_factory, ticket_type_factory
-):
-    event = event_factory()
-    ticket = ticket_type_factory(event=event, quantity_available=10, quantity_sold=0)
+def test_booking_ticket_updates_ticket_type_quantity(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=500,
+        with_ticket_types=[{"quantity_available": 20, "quantity_sold": 0}],
+    )
+    ticket = event.ticket_types.all()[0]
 
     payload = {
         "event_id": event.id,
@@ -45,16 +46,16 @@ def test_booking_ticket_updates_ticket_type_quantity(
     assert response.status_code == status.HTTP_201_CREATED
 
     ticket.refresh_from_db()
-    assert ticket.quantity_available == 7
+    assert ticket.quantity_available == 17
     assert ticket.quantity_sold == 3
 
 
 @pytest.mark.django_db
-def test_ticket_type_with_enough_availability(
-    attendee_client, event_factory, ticket_type_factory
-):
-    event = event_factory()
-    ticket = ticket_type_factory(event=event)
+def test_ticket_type_with_enough_availability(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=500, with_ticket_types=[{"quantity_available": 50}]
+    )
+    ticket = event.ticket_types.all()[0]
 
     payload = {
         "event_id": event.id,
@@ -67,10 +68,12 @@ def test_ticket_type_with_enough_availability(
 
 @pytest.mark.django_db
 def test_ticket_type_availability_equals_request_quantity(
-    attendee_client, event_factory, ticket_type_factory
+    attendee_client, event_factory
 ):
-    event = event_factory()
-    ticket = ticket_type_factory(event=event)
+    event = event_factory(
+        total_capacity=500, with_ticket_types=[{"quantity_available": 20}]
+    )
+    ticket = event.ticket_types.all()[0]
 
     payload = {
         "event_id": event.id,
@@ -86,11 +89,11 @@ def test_ticket_type_availability_equals_request_quantity(
 
 
 @pytest.mark.django_db
-def test_quantity_exceeds_ticket_type_availability(
-    attendee_client, event_factory, ticket_type_factory
-):
-    event = event_factory()
-    ticket = ticket_type_factory(event=event)
+def test_quantity_exceeds_ticket_type_availability(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=500, with_ticket_types=[{"quantity_available": 20}]
+    )
+    ticket = event.ticket_types.all()[0]
 
     payload = {
         "event_id": event.id,
@@ -106,11 +109,11 @@ def test_quantity_exceeds_ticket_type_availability(
 
 
 @pytest.mark.django_db
-def test_quantity_equals_event_capacity(
-    attendee_client, event_factory, ticket_type_factory
-):
-    event = event_factory()
-    ticket = ticket_type_factory(event=event, quantity_available=event.total_capacity)
+def test_quantity_equals_event_capacity(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=100, with_ticket_types=[{"quantity_available": 200}]
+    )
+    ticket = event.ticket_types.all()[0]
 
     payload = {
         "event_id": event.id,
@@ -126,12 +129,15 @@ def test_quantity_equals_event_capacity(
 
 
 @pytest.mark.django_db
-def test_total_quantity_exceeds_event_capacity(
-    attendee_client, event_factory, ticket_type_factory
-):
-    event = event_factory()
-    ticket1 = ticket_type_factory(event=event)
-    ticket2 = ticket_type_factory(event=event, quantity_available=event.total_capacity)
+def test_total_quantity_exceeds_event_capacity(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=50,
+        with_ticket_types=[{"quantity_available": 100}, {"quantity_available": 60}],
+    )
+    tickets = event.ticket_types.all()
+
+    ticket1 = tickets[0]
+    ticket2 = tickets[1]
 
     payload = {
         "event_id": event.id,
@@ -145,3 +151,32 @@ def test_total_quantity_exceeds_event_capacity(
     error_msg = BookingMessages.QUANTITY_EXCEED_CAPACITY
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_msg in response.data
+
+
+@pytest.mark.django_db
+def test_create_calcurate_total_price(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=500,
+        with_ticket_types=[{"quantity_available": 200}, {"quantity_available": 100}],
+    )
+    tickets = event.ticket_types.all()
+
+    ticket1 = tickets[0]
+    ticket2 = tickets[1]
+
+    payload = {
+        "event_id": event.id,
+        "items": [
+            {"ticket_type_id": ticket1.id, "quantity": 2},
+            {"ticket_type_id": ticket2.id, "quantity": 5},
+        ],
+    }
+
+    response = attendee_client.post(CREATE_URL, payload, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    total_price = ticket1.price * 2 + ticket2.price * 5
+    reference = response.data["booking_reference"]
+
+    booking = Booking.objects.get(booking_reference=reference)
+    assert booking.total_price == total_price

@@ -14,5 +14,8 @@ class BookingCreateView(APIView):
         serializer = BookingSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             booking = serializer.save()
-            return Response({"booking_id": booking.id}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"booking_reference": booking.booking_reference},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
