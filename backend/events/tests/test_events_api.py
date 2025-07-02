@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import pytest
-from common.choices import EventStatus
+from common.choices import BookingStatus, EventStatus
 from django.urls import reverse
 from django.utils import timezone
 from events.models import Event
@@ -189,6 +189,23 @@ def test_organizer_cannot_update_other_organizers_event(
 
     response = organizer_client.patch(url, data, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_event_status_cancel_will_cancel_bookings(organizer_client, booking_factory):
+    """
+    Test that updating event status to cancel will update booking status.
+    """
+    organizer = organizer_client.user
+    booking = booking_factory(event__organizer=organizer, with_items=3)
+    event = booking.event
+
+    assert booking.status == BookingStatus.CONFIRMED
+
+    url = reverse(DETAIL_URL, kwargs={"pk": event.id})
+    data = {"status": EventStatus.CANCELLED}
+    response = organizer_client.patch(url, data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
 
 
 # === Test Event Delete Views ===
