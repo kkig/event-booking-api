@@ -204,8 +204,10 @@ def test_event_status_cancel_will_cancel_bookings(organizer_client, booking_fact
     url = reverse(DETAIL_URL, kwargs={"pk": event.id})
     data = {"status": EventStatus.CANCELLED}
     response = organizer_client.patch(url, data, format="json")
-
     assert response.status_code == status.HTTP_200_OK
+
+    booking.refresh_from_db()
+    assert booking.cancelled_at is not None
 
 
 # === Test Event Delete Views ===

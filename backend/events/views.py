@@ -1,6 +1,7 @@
 from accounts.permissions import IsOrganizer
 from bookings.models import Booking
 from common.choices import BookingStatus, EventStatus
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from events.constants import EventMessages
 from rest_framework import filters, mixins, permissions, viewsets
@@ -61,11 +62,13 @@ class EventViewSet(viewsets.ModelViewSet):
         is_cancelled = updated_event.status == EventStatus.CANCELLED
 
         if is_updated and is_cancelled:
+            now = timezone.now()
             # Cancel related bookings
             bookings = list(Booking.objects.filter(event=updated_event))
             for booking in bookings:
                 booking.status = BookingStatus.CANCELLED
-            Booking.objects.bulk_update(bookings, ["status"])
+                booking.cancelled_at = now
+            Booking.objects.bulk_update(bookings, ["status", "cancelled_at"])
 
             # Deactivate ticket types
             TicketType.objects.filter(event=updated_event).update(is_active=False)
