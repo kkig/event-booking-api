@@ -1,4 +1,7 @@
+from typing import cast
+
 from accounts.permissions import IsAttendee
+from bookings.models import Booking
 from bookings.serializers import BookingSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +16,7 @@ class BookingCreateView(APIView):
     def post(self, request):
         serializer = BookingSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            booking = serializer.save()
+            booking = cast(Booking, serializer.save())
             return Response(
                 {"booking_reference": booking.booking_reference},
                 status=status.HTTP_201_CREATED,
