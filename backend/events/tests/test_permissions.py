@@ -1,3 +1,4 @@
+# isort: skip_file
 from datetime import timedelta
 
 import pytest
