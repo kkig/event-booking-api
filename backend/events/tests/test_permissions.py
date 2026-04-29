@@ -1,12 +1,10 @@
-# isort: skip_file
 from datetime import timedelta
 
 import pytest
+from common.choices import EventStatus
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
-
-from common.choices import EventStatus
 
 LIST_URL = reverse("events:event-list")
 DETAIL_URL = "events:event-detail"
