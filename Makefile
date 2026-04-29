@@ -57,13 +57,13 @@ test:
 
 # Lint code using flake8, isort, and black (check-only)
 lint:
-	flake8 .
-	isort --check-only .
-	black --check .
+	docker-compose exec $(WEB)flake8 .
+	docker-compose exec $(WEB) isort --check-only .
+	docker-compose exec $(WEB) black --check .
 
 # Format code using black, flake8, and isort
 format:
-	black .
-	flake8 .
-	isort .
-	codespell .
+	docker-compose exec $(WEB) black .
+	docker-compose exec $(WEB) flake8 .
+	docker-compose exec $(WEB) isort .
+	docker-compose exec $(WEB)codespell .
