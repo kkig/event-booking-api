@@ -1,7 +1,11 @@
+from datetime import timedelta
+
 import pytest
-from common.choices import EventStatus
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
+
+from common.choices import EventStatus
 
 LIST_URL = reverse("events:event-list")
 DETAIL_URL = "events:event-detail"
@@ -9,12 +13,13 @@ DETAIL_URL = "events:event-detail"
 TICKET_TYPE_LIST = "events:event-ticket-types-list"
 TICKET_TYPE_DETAIL = "events:event-ticket-types-detail"
 
+future_time = (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 # === Test Event Get permissions ===
 DUMMY_EVENT_DATA = {
     "name": "New Concert",
     "description": "A rock concert",
-    "start_time": "2025-12-25T19:00:00Z",
+    "start_time": future_time,
     "location": "Stadium",
     "total_capacity": 5000,
     "status": EventStatus.UPCOMING,
