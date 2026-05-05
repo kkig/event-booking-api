@@ -1,3 +1,14 @@
+# The project configuration
+[project]
+name = "event-booking-api"
+version = "0.1.0"
+description = "Event Booking and management API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+
+# Tool settings
 [tool.black]
 target-version = ['py313']
 include = '\.py$'
