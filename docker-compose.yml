@@ -1,6 +1,8 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      target: development
     ports:
       - "8000:8000"
     container_name: ticketing_web
@@ -10,7 +12,7 @@ services:
       - ALLOWED_HOSTS
       - DJANGO_SETTINGS_MODULE
     volumes:
-      - ./backend:/code
+      - ./backend:/code       # Live code sync for development.
     depends_on:
       - db
 
