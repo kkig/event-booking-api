@@ -7,11 +7,11 @@ WEB=web
 
 # Apply all database migrations
 migrate:
-	docker-compose exec $(WEB) python manage.py migrate
+	docker-compose run --rm $(WEB) python manage.py migrate
 
 # Create new migration files based on model changes
 migrations:
-	docker-compose exec $(WEB) python manage.py makemigrations
+	docker-compose run --rm $(WEB) python manage.py makemigrations
 
 # Create a Django superuser (interactive)
 createsuperuser:
@@ -53,17 +53,17 @@ rebuild:
 
 # Run all tests using pytest
 test:
-	docker-compose exec $(WEB) pytest
+	docker-compose run --rm $(WEB) pytest
 
 # Lint code using flake8, isort, and black (check-only)
 lint:
-	docker-compose exec $(WEB)flake8 .
-	docker-compose exec $(WEB) isort --check-only .
-	docker-compose exec $(WEB) black --check .
+	docker-compose run --rm $(WEB) flake8 .
+	docker-compose run --rm $(WEB) isort --check-only .
+	docker-compose run --rm $(WEB) black --check .
 
 # Format code using black, flake8, and isort
 format:
-	docker-compose exec $(WEB) black .
-	docker-compose exec $(WEB) flake8 .
-	docker-compose exec $(WEB) isort .
-	docker-compose exec $(WEB)codespell .
+	docker-compose run --rm $(WEB) black .
+	docker-compose run --rm $(WEB) flake8 .
+	docker-compose run --rm $(WEB) isort .
+	docker-compose run --rm $(WEB) codespell .
