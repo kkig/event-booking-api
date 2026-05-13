@@ -27,3 +27,17 @@ repos:
         language: system
         types: [python]
         files: \.md$
+
+      - id: docker-test
+        name: docker-test
+        entry: make test
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+
+      - id: docker-lint
+        name: docker-lint
+        entry: make lint
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
