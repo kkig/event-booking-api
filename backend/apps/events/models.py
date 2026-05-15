@@ -10,7 +10,7 @@ User = get_user_model()
 class Event(models.Model):
     organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="events")
     name = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
     location = models.CharField(max_length=255)
@@ -43,7 +43,7 @@ class TicketType(models.Model):
         related_name="ticket_types",
     )
     name = models.CharField(max_length=100, validators=[MinLengthValidator(1)])
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
     )

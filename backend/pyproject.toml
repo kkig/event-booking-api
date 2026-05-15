@@ -34,28 +34,60 @@ dev = [
     "pytest-django>=4.11.1",
     "pytest-factoryboy>=2.7.0",
     "pytest-mock>=3.14.1",
+    "ruff>=0.15.13",
 ]
 
 
 # Tool settings
-[tool.black]
-target-version = ['py313']
-include = '\.py$'
-exclude = '''
-(?x)(
-    /(\.venv|venv|build|dist|migrations|__pycache__|\.git)/
-    | manage\.py$
-    # | config/settings\.py$
-)
-'''
+[tool.ruff]
+line-length = 88
+extend-exclude = ["**/migrations/**", "manage.py", "**/config/settings/**.py"]
 
-[tool.isort]
-profile = "black"
-line_length = 88
-known_first_party = ["apps", "config"]
-# Root directory for the project
-src_paths = ["."]
-skip = ["migrations", "venv", ".venv", ".git"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle (flake8)
+# F: pyflakes (flake8)
+# I: isort
+# B: flake8-bugbear (common logic errors)
+# DJ: flake8-django
+select = ["E", "W", "F", "I", "B", "DJ"]
+ignore = []
+
+
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/**" = ["F403", "F405"]
+"**/settings/**.py" = ["F403", "F405"]
+
+
+[tool.ruff.format]
+# Match Black's formatting rules
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "config"]
+
+
+# [tool.black]
+# target-version = ['py313']
+# include = '\.py$'
+# exclude = '''
+# (?x)(
+#     /(\.venv|venv|build|dist|migrations|__pycache__|\.git)/
+#     | manage\.py$
+#     # | config/settings\.py$
+# )
+# '''
+
+# [tool.isort]
+# profile = "black"
+# line_length = 88
+# known_first_party = ["apps", "config"]
+# # Root directory for the project
+# src_paths = ["."]
+# skip = ["migrations", "venv", ".venv", ".git"]
 
 [tool.codespell]
 skip = ["migrations", "venv", ".venv", ".git"]
