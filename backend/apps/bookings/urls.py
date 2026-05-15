@@ -1,0 +1,23 @@
+from django.urls import path
+
+from apps.bookings.views.cancel import BookingCancelView
+
+from .views import BookingCreateView, BookingDetailView, BookingListView
+
+url_prefix = "bookings/"
+app_name = "bookings"
+
+urlpatterns = [
+    path("users/me/bookings", BookingListView.as_view(), name="my-bookings"),
+    path(
+        f"{url_prefix}<str:booking_reference>",
+        BookingDetailView.as_view(),
+        name="booking-detail",
+    ),
+    path(f"{url_prefix}", BookingCreateView.as_view(), name="booking-create"),
+    path(
+        f"{url_prefix}<str:booking_reference>/cancel",
+        BookingCancelView.as_view(),
+        name="booking-cancel",
+    ),
+]

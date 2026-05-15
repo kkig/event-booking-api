@@ -53,6 +53,8 @@ ENV PATH="/opt/.venv/bin:$PATH"
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
+COPY . .
+
 # In dev, we don't COPY the code because we use volumes in compose to sync the code.
 CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
@@ -70,7 +72,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
 # Copy application source code.
-COPY ./backend /code
+COPY . .
 
 EXPOSE 8000
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     # Local apps
-    "accounts",
-    "bookings",
-    "events",
+    "apps.accounts",
+    "apps.bookings",
+    "apps.events",
 ]
 
 MIDDLEWARE = [

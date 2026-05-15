@@ -41,7 +41,7 @@ urlpatterns = [
         name="redoc",
     ),
     # Include your app routes here
-    path(f"{api_prefix}auth/", include("accounts.urls")),
-    path(f"{api_prefix}events/", include("events.urls")),
-    path(f"{api_prefix}", include("bookings.urls")),
+    path(f"{api_prefix}auth/", include("apps.accounts.urls")),
+    path(f"{api_prefix}events/", include("apps.events.urls")),
+    path(f"{api_prefix}", include("apps.bookings.urls")),
 ]

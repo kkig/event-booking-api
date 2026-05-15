@@ -53,7 +53,13 @@ exclude = '''
 profile = "black"
 line_length = 88
 known_first_party = ["apps", "config"]
+# Root directory for the project
+src_paths = ["."]
 skip = ["migrations", "venv", ".venv", ".git"]
 
 [tool.codespell]
 skip = ["migrations", "venv", ".venv", ".git"]
+
+[tool.pytest]
+pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "config.settings"

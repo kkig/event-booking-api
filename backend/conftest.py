@@ -1,11 +1,12 @@
 import pytest
-from accounts.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
-
-# Import factories
-from bookings.tests.factories import BookingFactory, BookingItemFactory
-from events.tests.factories import EventFactory, TicketTypeFactory
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
+
+from apps.accounts.tests.factories import AttendeeFactory, OrganizerFactory, UserFactory
+
+# Import factories
+from apps.bookings.tests.factories import BookingFactory, BookingItemFactory
+from apps.events.tests.factories import EventFactory, TicketTypeFactory
 
 # === Register the factories as fixtures ===
 # By default, the fixture name will be the lowercase class name
