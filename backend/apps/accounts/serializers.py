@@ -109,12 +109,14 @@ class ChangePasswordSerializer(serializers.Serializer):
             validate_password(data["new_password1"], self.context["request"].user)
         except DjangoValidationError as e:  # Catch Django's ValidationError
             # Mat Django's validation errors to the 'new_password1' field
-            raise serializers.ValidationError({"new_password1": list(e.messages)})
+            raise serializers.ValidationError(
+                {"new_password1": list(e.messages)}
+            ) from e
         except Exception as e:
             # Catch any other unexpected errors during password validation
             raise serializers.ValidationError(
                 {"new_password1": f"An unexpected error occurred: {e}"}
-            )
+            ) from e
 
         return data
 
@@ -230,7 +232,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             raise serializers.ValidationError(
                 {"uid": PasswordMessasges.INVALID_UID_OR_NO_USER}
-            )
+            ) from None
 
         # Validate the token
         token_generator = PasswordResetTokenGenerator()
@@ -243,7 +245,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         try:
             validate_password(data["new_password1"], user)
         except DjangoValidationError as e:
-            raise serializers.ValidationError({"new_password1": list(e)})
+            raise serializers.ValidationError({"new_password1": list(e)}) from e
 
         # Store the user object in context for the save method
         self.context["user"] = user
