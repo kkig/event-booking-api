@@ -21,13 +21,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
     "codespell>=2.4.1",
     "djlint>=1.36.4",
     "factory-boy>=3.3.3",
     "faker>=37.3.0",
-    "flake8>=7.2.0",
-    "isort>=6.0.1",
     "pre-commit>=4.2.0",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
@@ -51,7 +48,7 @@ extend-exclude = ["**/migrations/**", "manage.py", "**/config/settings/**.py"]
 # B: flake8-bugbear (common logic errors)
 # DJ: flake8-django
 select = ["E", "W", "F", "I", "B", "DJ"]
-ignore = []
+ignore = ["E501"]
 
 
 [tool.ruff.lint.per-file-ignores]

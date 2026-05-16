@@ -3,12 +3,15 @@
   "python.analysis.extraPaths": ["./backend"],
 
   // Use the virtual environment Python interpreter inside the project
-  "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
 
-  // Format the file automatically on save using Black
+  // Format the file automatically on save
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll": "always"
+    },
   },
 
   // Django HTML formatting
@@ -34,45 +37,34 @@
   "python.analysis.autoSearchPaths": true,
   "python.analysis.useLibraryCodeForTypes": true,
   "python.analysis.diagnosticSeverityOverrides": {
-    // "reportAttributeAccessIssue": "none",
     "reportPrivateImportUsage": "none",
     "reportUnusedVariable": "information",
     "reportOptionalSubscript": "none",
     "reportIndexIssue": "none",
-    // "reportUnknownMemberType": "none",
-    // "reportUnknownVariableType": "none",
-    // "reportUnknownArgumentType": "none"
   },
 
-  // Exclude common cache and environment folders from explorer and search
+  // Exclude common cache and environment folders from explorer
   "files.exclude": {
     "**/__pycache__": true,
     "**/.pytest_cache": true,
-    "**/venv": true,
+    "**/backend/.venv": true,
     "**/.mypy_cache": true,
     "**/.tox": true,
     "**/.cache": true
   },
 
-  // Exclude the above from searches too
+  // Exclude the same folders from global project searches
   "search.exclude": {
     "**/__pycache__": true,
-    "**/.pytest_cache": true,
-    "**/venv": true,
+    "**/backend/.pytest_cache": true,
+    "**/.venv": true,
     "**/.mypy_cache": true,
     "**/.tox": true,
     "**/.cache": true
   },
 
-  // Use isort for import sorting on save
-  "editor.codeActionsOnSave": [
-    "source.organizeImports"
-  ],
-
-  // Show whitespace characters (optional, helps spot formatting issues)
+  // Text Editor Layout & Consistency Standards
   "editor.renderWhitespace": "all",
-
-  // Keep whitespace and indentation consistent
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
   "files.trimTrailingWhitespace": true,

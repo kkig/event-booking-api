@@ -53,3 +53,6 @@ CHANGELOG.md
 docs/
 *.pdf
 *.md
+
+# ruff cache
+.ruff_cache/
