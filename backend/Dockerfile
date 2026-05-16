@@ -64,7 +64,7 @@ CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 # ------------------------------------------------------------
 FROM base AS production
 
-# Ensure commands complile to bytecode for faster startup in production. (Optional)
+# Ensure commands compile to bytecode for faster startup in production. (Optional)
 ENV UV_COMPILE_BYTECODE=1
 
 # Install ONLY production dependencies (--no-dev).
