@@ -22,7 +22,8 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     # Hashed via set_password() - required to pass user.check_password()
     password = factory.PostGenerationMethodCall(
-        "set_password", "password123"  # Default password for tests
+        "set_password",
+        "password123",  # Default password for tests
     )
     role = UserRole.ATTENDEE
 

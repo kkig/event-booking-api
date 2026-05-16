@@ -43,7 +43,9 @@ class EventFactory(django.DjangoModelFactory):
     @post_generation
     def with_ticket_types(instance: Self, create: bool, extracted, **kwargs):
         """
-        Optional: `EventFactory(with_ticket_types=3)` creates 3 TicketTypes for the event.
+        Optional: `EventFactory(with_ticket_types=3)` creates
+        3 TicketTypes for the event.
+
         You can also pass a dict for specific ticket type configurations:
         `EventFactory(with_ticket_types=[{'name': 'VIP', 'price': 100}])`
         """
@@ -84,7 +86,8 @@ class TicketTypeFactory(django.DjangoModelFactory):
         """
         Ensures uniqueness of ticket type name per event by appending a number
         if a duplicate is detected during testing.
-        This is a defensive measure for specific test cases; factory_boy usually handles it.
+        This is a defensive measure for specific test cases.
+        (factory_boy usually handles it)
         """
         if not create:
             return
@@ -93,5 +96,5 @@ class TicketTypeFactory(django.DjangoModelFactory):
         # in specific test setups rather than general factory usage.
         # factory_boy's default strategies usually ensure unique values for CharFields
         # if not explicitly set to be non-unique.
-        # If you hit `IntegrityError` due to unique constraint, this could be elaborated.
+        # If you hit `IntegrityError` due to unique constraint, elaborate here.
         pass

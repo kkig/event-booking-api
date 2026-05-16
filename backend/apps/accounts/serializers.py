@@ -201,7 +201,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             )
             email.send()
 
-        # Always returns success to prevent email enumeration, even if user doesn't exist
+        # Returns success to prevent email enumeration (even if user doesn't exist)
         return True
 
 

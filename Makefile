@@ -62,6 +62,9 @@ ruff:
 ruff-fix:
 	cd backend && uv run ruff check --fix .
 
+ruff-format:
+	cd backend && uv run ruff format .
+
 # Lint code using flake8, isort, and black (check-only)
 lint:
 	docker-compose run --rm $(WEB) flake8 .

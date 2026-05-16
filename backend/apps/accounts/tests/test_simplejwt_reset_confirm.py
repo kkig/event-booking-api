@@ -30,7 +30,10 @@ def get_uid_and_token_from_email(user: MyUser):
     # This regex looks for patterns like /password-reset-confirm/base64uid/token/
     import re
 
-    url = r"password-reset-confirm/([0-9A-Za-z_\-]+)/([0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/"
+    url = (
+        r"password-reset-confirm/([0-9A-Za-z_\-]+)/"
+        r"([0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/"
+    )
 
     match = re.search(
         url,
@@ -191,7 +194,7 @@ def test_password_reset_confirm_invalid_new_password_strength(
     api_client, organizer_factory
 ):
     """
-    Tests password reset confirmation fails if new password does not meet strengthrequirements.
+    Tests password reset confirmation fails if new password does not meet requirements.
     """
     user_email = "confirm_weak_pass@example.com"
     user: MyUser = cast(MyUser, organizer_factory.create(email=user_email))

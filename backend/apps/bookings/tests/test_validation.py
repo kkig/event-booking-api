@@ -100,7 +100,8 @@ def test_reject_multiple_entries_for_a_ticket_type(
     attendee_client, event_factory, ticket_type_factory
 ):
     """
-    Test that request get rejected when there are multiple entries with the same ticket type.
+    Test that request get rejected when there are multiple entries
+    with the same ticket type.
     """
     event = event_factory(total_capacity=10)
     ticket = ticket_type_factory(event=event, quantity_available=10, name="Standard")

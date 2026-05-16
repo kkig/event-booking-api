@@ -32,7 +32,10 @@ class Booking(models.Model):
         ordering = ["-created_at"]  # Most recent booking first
 
     def __str__(self):
-        return f"Booking {self.booking_reference} by {self.user.username} for {self.event.name}"
+        return (
+            f"Booking {self.booking_reference} by {self.user.username} "
+            f"for {self.event.name}"
+        )
 
 
 class BookingItem(models.Model):
@@ -53,4 +56,7 @@ class BookingItem(models.Model):
         ordering = ["ticket_type__name"]
 
     def __str__(self):
-        return f"{self.quantity} x {self.ticket_type.name} for Booking {self.booking.booking_reference}"
+        return (
+            f"{self.quantity} x {self.ticket_type.name} for "
+            f"Booking {self.booking.booking_reference}"
+        )

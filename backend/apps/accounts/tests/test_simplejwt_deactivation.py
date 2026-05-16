@@ -52,8 +52,8 @@ def test_deactivate_account_success(api_client, organizer_factory):
     login_fail_response = api_client.post(LOGIN_URL, login_data, format="json")
     assert login_fail_response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    # Try to access profile with deactivated account (Should fail or result in 401 with old token)
-    # Re-set credentials with the old token, which should now be invalid because user is inactive
+    # Try to access profile with deactivated account
+    # It should fail or result in 401 with old token
     api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     profile_response = api_client.get(USER_PROFILE_URL)
 
