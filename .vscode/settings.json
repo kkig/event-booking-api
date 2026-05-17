@@ -14,10 +14,11 @@
     },
   },
 
-  // Django HTML formatting
   "files.associations": {
-    "**/templates/**/*.html": "django-html"
+    "**/templates/**/*.html": "django-html",
+    ".codespellrc": "init"
   },
+  // Django HTML formatting
   "[django-html]": {
     "editor.defaultFormatter": "monosans.djlint",
     "editor.quickSuggestions": {
@@ -42,6 +43,11 @@
     "reportOptionalSubscript": "none",
     "reportIndexIssue": "none",
   },
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*"
+  ],
 
   // Exclude common cache and environment folders from explorer
   "files.exclude": {

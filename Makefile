@@ -7,7 +7,7 @@ WEB=web
 
 # Tells Make to always run the specified targes,
 # even if folders/files with the same name exist in the root directory.
-.PHONY: migrate migrations createsuperuser shell up up-detach down build rebuild test lint lint-fix format spellcheck
+.PHONY: migrate migrations createsuperuser shell up up-detach down build rebuild test lint lint-fix format format-diff spellcheck
 
 
 # -----------------------------------------------------------------------------
@@ -66,18 +66,18 @@ test:
 
 # Run ruff to check for linting issues locally
 lint:
-	uv run --project=backend ruff check backend/ --cache-dir=backend/.ruff_cache
+	uv run --project=backend ruff check backend/
 
 # Automatically fix fixable linting issues
 lint-fix:
-	uv run --project=backend ruff check --fix backend/ --cache-dir=backend/.ruff_cache
+	uv run --project=backend ruff check --fix backend/
 
 # Format code according to project style guidelines
 format:
-	uv run --project=backend ruff format backend/ --cache-dir=backend/.ruff_cache
+	uv run --project=backend ruff format backend/
 
 format-diff:
-	uv run --project=backend ruff format --diff backend/ --cache-dir=backend/.ruff_cache
+	uv run --project=backend ruff format --diff backend/
 
 # Run spellcheck on codebase
 spellcheck:

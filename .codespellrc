@@ -1,0 +1,7 @@
+# -----------------------------------------------------------------------------
+# Codespell Configuration (Spell check)
+# -----------------------------------------------------------------------------
+
+[codespell]
+skip = ./.git,./backend/.venv,./backend/uv.lock,**/__pycache__
+# ignore-words-list = auth_tok,mycustomjargon
