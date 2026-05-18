@@ -47,8 +47,12 @@ extend-exclude = ["**/migrations/**", "manage.py", "**/config/settings/**.py"]
 # B: flake8-bugbear (common logic errors)
 # DJ: flake8-django
 select = ["E", "W", "F", "I", "B", "DJ"]
-ignore = ["E501"]
 
+# Explicitly ignore these rules project-wide
+ignore = [
+    "E501", # Let ruff format handle line length
+    "W191", # Let ruff format handle indentation
+]
 
 [tool.ruff.lint.per-file-ignores]
 "**/migrations/**" = ["F403", "F405"]
@@ -61,32 +65,13 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 
-
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]
 
 
-# [tool.black]
-# target-version = ['py313']
-# include = '\.py$'
-# exclude = '''
-# (?x)(
-#     /(\.venv|venv|build|dist|migrations|__pycache__|\.git)/
-#     | manage\.py$
-#     # | config/settings\.py$
-# )
-# '''
-
-# [tool.isort]
-# profile = "black"
-# line_length = 88
-# known_first_party = ["apps", "config"]
-# # Root directory for the project
-# src_paths = ["."]
-# skip = ["migrations", "venv", ".venv", ".git"]
-
 [tool.codespell]
 skip = ["migrations", "venv", ".venv", ".git"]
+
 
 [tool.pytest]
 pythonpath = ["."]
