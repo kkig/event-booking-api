@@ -129,9 +129,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.context["request"].user
 
         # Explicitly assert that validation_data is a dictionary.
-        assert isinstance(
-            self.validated_data, dict
-        ), "Validated data should be a dictionary at this point."
+        assert isinstance(self.validated_data, dict), (
+            "Validated data should be a dictionary at this point."
+        )
 
         # At this point, Pylane understands self.validated_data is a dict.
         user.set_password(self.validated_data["new_password1"])
