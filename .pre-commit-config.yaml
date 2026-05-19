@@ -8,33 +8,30 @@ repos:
       - id: ruff-lint
         name: ruff lint
         # Using 'uv run' ensure it uses project's locked ruff version
-        entry: uv run --project=backend ruff check backend/ --fix
-        args: ["--cache-dir=backend/"]
-        # args: ["--config=backend/pyproject.toml", "--cache-dir=backend/"]
+        entry: cd backend && uv run ruff check . --fix
         language: system
         types_or: [python, pyi]
 
       - id: ruff-format
         name: ruff format
-        entry: uv run --project=backend ruff format backend/ --diff
-        args: ["--cache-dir=backend/"]
-        # args: ["--config=backend/pyproject.toml", "--cache-dir=backend/"]
+        entry: cd backend && uv run ruff format . --diff
         language: system
         types_or: [python, pyi]
-
-      - id: codespell
-        name: codespell
-        entry: uvx codespell .
-        language: system
-        # Use pyproject.toml for config
-        # additional_dependencies: ["tomli"]
-        files: \.md$
-        # files: \.(py|md|txt)$
-        args: ["--config=backend/pyproject.toml"]
 
       - id: docker-test
         name: docker-test
         entry: make test
         language: system
         stages: [pre-push]
+        # Don't pass filenames to this hook since it runs tests on the whole codebase
         pass_filenames: false
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        name: codespell
+        language: python
+        # Use pyproject.toml for config
+        additional_dependencies: ["toml"]
+        files: \.(py|md|txt)$

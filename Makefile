@@ -62,22 +62,22 @@ rebuild:
 
 # Run all tests inside the container
 test:
-	docker compose run --rm $(WEB) pytest
+	docker compose run --rm -T $(WEB) pytest --color=yes
 
 # Run ruff to check for linting issues locally
 lint:
-	uv run --project=backend ruff check backend/
+	cd backend && uv run ruff check .
 
 # Automatically fix fixable linting issues
 lint-fix:
-	uv run --project=backend ruff check --fix backend/
+	cd backend && uv run ruff check --fix .
 
 # Format code according to project style guidelines
 format:
-	uv run --project=backend ruff format backend/
+	cd backend && uv run ruff format .
 
 format-diff:
-	uv run --project=backend ruff format --diff backend/
+	cd backend && uv run ruff format --diff .
 
 # Run spellcheck on codebase
 spellcheck:

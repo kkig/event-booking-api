@@ -1,9 +1,0 @@
-# -----------------------------------------------------------------------------
-# Ruff Configuration (Python Linter and Formatter)
-# -----------------------------------------------------------------------------
-
-# Tell ruff to always find core settings inside the backend directory
-extend = "backend/pyproject.toml"
-
-# Force the cache directory to always live inside backend/
-cache-dir = "backend/.ruff_cache"
