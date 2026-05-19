@@ -1,43 +1,40 @@
+default_stages: [pre-commit]
+# Ensure that the pre-commit can understand syntax
+minimum_pre_commit_version: "4.6.0"
+
 repos:
   - repo: local
     hooks:
-      # - id: black
-      #   name: black
-      #   entry: uv run black backend
-      #   language: system
-      #   types: [python]
+      - id: ruff-lint
+        name: ruff lint
+        # Using 'uv run' ensure it uses project's locked ruff version
+        entry: uv run --project=backend ruff check backend/ --fix
+        args: ["--cache-dir=backend/"]
+        # args: ["--config=backend/pyproject.toml", "--cache-dir=backend/"]
+        language: system
+        types_or: [python, pyi]
 
-      # - id: isort
-      #   name: isort
-      #   entry: uv run isort backend
-      #   language: system
-      #   types: [python]
-
-      # - id: flake8
-      #   name: flake8
-      #   entry: uv run flake8 backend
-      #   language: system
-      #   types: [python]
-      #   # This points to .flake8 config file
-      #   args: ["--config=backend/.flake8"]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --project=backend ruff format backend/ --diff
+        args: ["--cache-dir=backend/"]
+        # args: ["--config=backend/pyproject.toml", "--cache-dir=backend/"]
+        language: system
+        types_or: [python, pyi]
 
       - id: codespell
         name: codespell
-        entry: uv run codespell .
+        entry: uvx codespell .
         language: system
-        types: [python]
+        # Use pyproject.toml for config
+        # additional_dependencies: ["tomli"]
         files: \.md$
+        # files: \.(py|md|txt)$
+        args: ["--config=backend/pyproject.toml"]
 
       - id: docker-test
         name: docker-test
         entry: make test
-        language: system
-        stages: [pre-push]
-        pass_filenames: false
-
-      - id: docker-lint
-        name: docker-lint
-        entry: make lint
         language: system
         stages: [pre-push]
         pass_filenames: false
