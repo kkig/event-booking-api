@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+.github
+.gitlab-ci.yml
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+
+# Build artifacts
+dist
+build
+
+# Virtual environment
+.venv
+
+# Python cache and compiled files
+**/__pycache__/
+**/*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Python version management (for machine)
+.python-version
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+*.bak
+*.tmp
+
+# Documentation files
+README.md
+LICENSE
+CHANGELOG.md
+docs/
+*.pdf
+*.md
+
+# ruff cache
+.ruff_cache/

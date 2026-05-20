@@ -1,23 +1,37 @@
+default_stages: [pre-commit]
+# Ensure that the pre-commit can understand syntax
+minimum_pre_commit_version: "4.6.0"
+
 repos:
-  - repo: https://github.com/psf/black
-    rev: 26.3.1
+  - repo: local
     hooks:
-      - id: black
-        language_version: python3.13
+      - id: ruff-lint
+        name: ruff lint
+        # Using 'uv run' ensure it uses project's locked ruff version
+        entry: cd backend && uv run ruff check . --fix
+        language: system
+        types_or: [python, pyi]
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 9.0.0a3
-    hooks:
-      - id: isort
-        language_version: python3.13
+      - id: ruff-format
+        name: ruff format
+        entry: cd backend && uv run ruff format . --diff
+        language: system
+        types_or: [python, pyi]
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
+      - id: docker-test
+        name: docker-test
+        entry: make test
+        language: system
+        stages: [pre-push]
+        # Don't pass filenames to this hook since it runs tests on the whole codebase
+        pass_filenames: false
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.2
     hooks:
       - id: codespell
-        files: \.md$
+        name: codespell
+        language: python
+        # Use pyproject.toml for config
+        additional_dependencies: ["toml"]
+        files: \.(py|md|txt)$

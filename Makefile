@@ -1,69 +1,84 @@
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+
 # Docker service name (as defined in docker-compose.yml)
 WEB=web
 
-# -----------------------------
+# Tells Make to always run the specified targes,
+# even if folders/files with the same name exist in the root directory.
+.PHONY: migrate migrations createsuperuser shell up up-detach down build rebuild test lint lint-fix format format-diff spellcheck
+
+
+# -----------------------------------------------------------------------------
 # Django Management Commands
-# -----------------------------
+# -----------------------------------------------------------------------------
 
 # Apply all database migrations
 migrate:
-	docker-compose exec $(WEB) python manage.py migrate
+	docker compose run --rm $(WEB) uv run manage.py migrate
 
 # Create new migration files based on model changes
 migrations:
-	docker-compose exec $(WEB) python manage.py makemigrations
+	docker compose run --rm $(WEB) uv run manage.py makemigrations
 
 # Create a Django superuser (interactive)
 createsuperuser:
-	docker-compose exec $(WEB) python manage.py createsuperuser
+	docker compose exec $(WEB) uv run manage.py createsuperuser
 
 # Open the Django shell inside the container
 shell:
-	docker-compose exec $(WEB) python manage.py shell
+	docker compose exec $(WEB) uv run manage.py shell
 
 
-# -----------------------------
+# -----------------------------------------------------------------------------
 # Docker Compose Commands
-# -----------------------------
+# -----------------------------------------------------------------------------
 
 # Start all services (foreground)
 up:
-	docker-compose up
+	docker compose up
 
 # Start all services (detached mode)
-up-d:
-	docker-compose up -d
+up-detach:
+	docker compose up -d
 
 # Stop all services and remove containers
 down:
-	docker-compose down
+	docker compose down
 
 # Build all containers
 build:
-	docker-compose -f docker-compose.yml build
+	docker compose build
 
 # Rebuild containers from scratch (no cache)
 rebuild:
-	docker-compose build --no-cache
+	docker compose build --no-cache
 
 
-# -----------------------------
-# Testing & Code Quality
-# -----------------------------
+# -----------------------------------------------------------------------------
+# Testing & Code Quality (Run locally for speed)
+# -----------------------------------------------------------------------------
 
-# Run all tests using pytest
+# Run all tests inside the container
 test:
-	docker-compose exec $(WEB) pytest
+	docker compose run --rm -T $(WEB) pytest --color=yes
 
-# Lint code using flake8, isort, and black (check-only)
+# Run ruff to check for linting issues locally
 lint:
-	docker-compose exec $(WEB)flake8 .
-	docker-compose exec $(WEB) isort --check-only .
-	docker-compose exec $(WEB) black --check .
+	cd backend && uv run ruff check .
 
-# Format code using black, flake8, and isort
+# Automatically fix fixable linting issues
+lint-fix:
+	cd backend && uv run ruff check --fix .
+
+# Format code according to project style guidelines
 format:
-	docker-compose exec $(WEB) black .
-	docker-compose exec $(WEB) flake8 .
-	docker-compose exec $(WEB) isort .
-	docker-compose exec $(WEB)codespell .
+	cd backend && uv run ruff format .
+
+format-diff:
+	cd backend && uv run ruff format --diff .
+
+# Run spellcheck on codebase
+spellcheck:
+	uvx codespell .
