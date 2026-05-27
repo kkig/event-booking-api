@@ -224,10 +224,10 @@ sequenceDiagram
 
 ## Running Tests
 
-Run tests inside the Docker container:
+Run tests:
 
 ```bash
-docker-compose exec web pytest --maxfail=1 --disable-warnings -q
+make test
 ```
 
 ### Concurrency Test Suite
@@ -250,13 +250,13 @@ This project includes a `Makefile` to simplify common development tasks:
 
 ### Development
 
-| Command        | Description                          |
-| -------------- | ------------------------------------ |
-| `make up`      | Start all services in the foreground |
-| `make up-d`    | Start all services in detached mode  |
-| `make down`    | Stop and remove containers           |
-| `make build`   | Build containers                     |
-| `make rebuild` | Rebuild containers without cache     |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `make up`         | Start all services in the foreground |
+| `make up-detach`  | Start all services in detached mode  |
+| `make down`       | Stop and remove containers           |
+| `make build`      | Build containers                     |
+| `make rebuild`    | Rebuild containers without cache     |
 
 ### Django Management
 
@@ -267,15 +267,22 @@ This project includes a `Makefile` to simplify common development tasks:
 | `make createsuperuser` | Create Django superuser                |
 | `make shell`           | Open Django shell inside the container |
 
-### Testing & Linting
+### Testing
 
-| Command       | Description                                     |
-| ------------- | ----------------------------------------------- |
-| `make test`   | Run tests with pytest                           |
-| `make lint`   | Run Flake8, isort, and Black in check-only mode |
-| `make format` | Auto-format code with Black, Flake8, isort      |
+| Command           | Description                           |
+| ----------------- | ------------------------------------- |
+| `make test`       | Run tests in Docker (Required for DB) |
 
-These commands work inside the Docker environment, and make day-to-day development faster and easier.
+### Local Tools
+
+| Command            | Description                                |
+| ------------------ | ------------------------------------------ |
+| `make lint`        | Check for linting issues                   |
+| `make lint-fix`    | Check and fix fixable issues               |
+| `make format`      | Auto-format code using style guidelines    |
+| `make format-diff` | See how the formatted code would look like |
+| `make spellcheck`  | Run spell checks                           |
+
 
 ## Pre-commit Hooks
 
