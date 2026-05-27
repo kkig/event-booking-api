@@ -19,7 +19,7 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 - [Running Tests](#running-tests)
 - [Makefile Commands](#makefile-commands)
 - [Pre-commit Hooks](#pre-commit-hooks)
-- [CI / GitHub Actions](#ci--github-actions)
+- [CI / CD](#ci--cd)
 - [Future Improvements](#future-improvements)
 
 ## Features
@@ -288,19 +288,9 @@ This project includes a `Makefile` to simplify common development tasks:
 
 This project uses [pre-commit](https://pre-commit.com/) to ensure code quality by running linters and formatters automatically before each commit. The hooks are defined in `.pre-commit-config.yaml`.
 
-## CI / GitHub Actions
+## CI / CD
 
-This project uses GitHub Actions to automatically check code formatting and linting on each push or pull request to `master` and `dev` branches.
-
-### Workflow: `Lint & Format Checks`
-
-Located in `.github/workflows/lint.yml`, this workflow ensures:
-
-- ✅ [black](https://github.com/psf/black) – Code is correctly formatted
-- ✅ [isort](https://github.com/PyCQA/isort) – Imports are sorted
-- ✅ [flake8](https://github.com/PyCQA/flake8) – Code follows linting rules
-
-The workflow runs on every push and PR to `master` or `dev`, helping catch issues early in CI.
+This project uses GitHub Actions to automatically check code formatting and linting. The workflow runs on every push and PR to `master`. The scripts are in `.github/workflows/lint.yml`.
 
 ## Future Improvements
 
