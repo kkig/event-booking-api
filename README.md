@@ -19,7 +19,7 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 - [Running Tests](#running-tests)
 - [Makefile Commands](#makefile-commands)
 - [Pre-commit Hooks](#pre-commit-hooks)
-- [CI / GitHub Actions](#ci--github-actions)
+- [CI / CD](#ci--cd)
 - [Future Improvements](#future-improvements)
 
 ## Features
@@ -48,8 +48,10 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 ### Prerequisites
 
 - Python 3.13
+- [uv (Python package manager)](https://docs.astral.sh/uv/getting-started/installation/)
 - PostgreSQL (with a database and user ready)
-- (Optional) Docker and Docker Compose for containerized setup
+- Docker and Docker Compose
+- make (Required for Makefile commands.)
 
 ### Installation Steps
 
@@ -59,22 +61,40 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
    cd event-booking-api
    ```
 2. Create a `.env` file based on `.env.example` and update environment variables as needed.
-3. Build and start containers (this will build the Docker images and start services such as Django app, PostgreSQL, Redis):
+3. Create a local virtual environment (`backend/.venv`). This is required to use local tools.
    ```bash
-   docker-compose up -d --build
+   uv sync --directory backend
    ```
-4. Run database migrations inside the Django container:
+4. Install hooks for local development:
    ```bash
-   docker-compose exec web python manage.py migrate
+   uv run pre-commit install --hook-type pre-commit --hook-type pre-push
    ```
-5. (Optional) Create a superuser inside the Django container:
+   **What it does:**
+   - It sets up a standard hook file inside the hidden `.git/hooks/pre-commit` folder to intercept `git commit`.
+   - It sets up a second hook file inside `.git/hooks/pre-push` to intercept `git push`.
+
+   **How to test hooks:**
    ```bash
-   docker-compose exec web python manage.py createsuperuser
+   # Test pre-commit hooks
+   uv run pre-commit run --all-files
+
+   # Test pre-push hooks
+   uv run pre-commit run --hook-stage pre-push --all-files
    ```
-6. The API server will be accessible at `http://localhost:8000` by default.
-7. To stop the containers:
+5. Run database migrations:
    ```bash
-   docker-compose down
+   make migrate
+   ```
+
+### Run App
+1. Start app:
+   ```bash
+   make up-detach
+   ```
+2. The API server will be accessible at `http://localhost:8000` by default. For example, `http://localhost:8000/api/events/`.
+3. To stop app:
+   ```bash
+   make down
    ```
 
 ## User Roles
@@ -204,10 +224,10 @@ sequenceDiagram
 
 ## Running Tests
 
-Run tests inside the Docker container:
+Run tests:
 
 ```bash
-docker-compose exec web pytest --maxfail=1 --disable-warnings -q
+make test
 ```
 
 ### Concurrency Test Suite
@@ -230,13 +250,13 @@ This project includes a `Makefile` to simplify common development tasks:
 
 ### Development
 
-| Command        | Description                          |
-| -------------- | ------------------------------------ |
-| `make up`      | Start all services in the foreground |
-| `make up-d`    | Start all services in detached mode  |
-| `make down`    | Stop and remove containers           |
-| `make build`   | Build containers                     |
-| `make rebuild` | Rebuild containers without cache     |
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `make up`         | Start all services in the foreground |
+| `make up-detach`  | Start all services in detached mode  |
+| `make down`       | Stop and remove containers           |
+| `make build`      | Build containers                     |
+| `make rebuild`    | Rebuild containers without cache     |
 
 ### Django Management
 
@@ -247,57 +267,30 @@ This project includes a `Makefile` to simplify common development tasks:
 | `make createsuperuser` | Create Django superuser                |
 | `make shell`           | Open Django shell inside the container |
 
-### Testing & Linting
+### Testing
 
-| Command       | Description                                     |
-| ------------- | ----------------------------------------------- |
-| `make test`   | Run tests with pytest                           |
-| `make lint`   | Run Flake8, isort, and Black in check-only mode |
-| `make format` | Auto-format code with Black, Flake8, isort      |
+| Command           | Description                           |
+| ----------------- | ------------------------------------- |
+| `make test`       | Run tests in Docker (Required for DB) |
 
-These commands work inside the Docker environment, and make day-to-day development faster and easier.
+### Local Tools
+
+| Command            | Description                                |
+| ------------------ | ------------------------------------------ |
+| `make lint`        | Check for linting issues                   |
+| `make lint-fix`    | Check and fix fixable issues               |
+| `make format`      | Auto-format code using style guidelines    |
+| `make format-diff` | See how the formatted code would look like |
+| `make spellcheck`  | Run spell checks                           |
+
 
 ## Pre-commit Hooks
 
-This project uses [pre-commit](https://pre-commit.com/) to ensure code quality by running linters and formatters automatically before each commit.
+This project uses [pre-commit](https://pre-commit.com/) to ensure code quality by running linters and formatters automatically before each commit. The hooks are defined in `.pre-commit-config.yaml`.
 
-### Setup
+## CI / CD
 
-1. Install pre-commit:
-   ```bash
-   pip install pre-commit
-   ```
-2. Install the hooks:
-   ```bash
-   pre-commit install
-   ```
-3. (Optional) Run all hooks manually:
-   ```bash
-   pre-commit run --all-files
-   ```
-
-### Configured Hooks
-
-These hooks are defined in `.pre-commit-config.yaml`:
-
-- ✅ [black](https://github.com/psf/black) – Python code formatter
-- ✅ [isort](https://github.com/PyCQA/isort) – Sorts and organizes Python imports
-- ✅ [flake8](https://github.com/PyCQA/flake8) – Python linter
-- ✅ [codespell](https://github.com/codespell-project/codespell) – Spell checker for `.md` files
-
-## CI / GitHub Actions
-
-This project uses GitHub Actions to automatically check code formatting and linting on each push or pull request to `master` and `dev` branches.
-
-### Workflow: `Lint & Format Checks`
-
-Located in `.github/workflows/lint.yml`, this workflow ensures:
-
-- ✅ [black](https://github.com/psf/black) – Code is correctly formatted
-- ✅ [isort](https://github.com/PyCQA/isort) – Imports are sorted
-- ✅ [flake8](https://github.com/PyCQA/flake8) – Code follows linting rules
-
-The workflow runs on every push and PR to `master` or `dev`, helping catch issues early in CI.
+This project uses GitHub Actions to automatically check code formatting and linting. The workflow runs on every push and PR to `master`. The scripts are in `.github/workflows/lint.yml`.
 
 ## Future Improvements
 
