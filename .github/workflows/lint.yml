@@ -25,14 +25,15 @@ jobs:
           # Automatically caches uv's virtual environments
           enable-cache: true
           cache-dependency-glob: "backend/uv.lock"
+          python-version: "3.13"
 
       - name: Set up Python
-        run: uv python install 3.13
+        run: uv python install
 
       - name: Run Ruff Lint
-        run: uv run ruff check .
+        run: uv run --frozen ruff check .
         working-directory: backend
 
       - name: Run Ruff Format
-        run: uv run ruff format . --check
+        run: uv run --frozen ruff format . --check
         working-directory: backend
