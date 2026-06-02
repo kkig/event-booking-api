@@ -73,6 +73,13 @@ known-first-party = ["apps", "config"]
 skip = ["migrations", "venv", ".venv", ".git"]
 
 
-[tool.pytest]
+[tool.pytest.ini_options]
 pythonpath = ["."]
-DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+# --nomigrations: Don't run migrations on test DB
+# --reuse-db: Reuses test database between runs for speed (great for large suites)
+# -s: Allow print statements in tests
+# -v: Verbose output
+# --ds: Specify Django settings module
+addopts = "--ds=config.settings.development --nomigrations --reuse-db -s"
