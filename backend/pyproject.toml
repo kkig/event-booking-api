@@ -75,6 +75,7 @@ skip = ["migrations", "venv", ".venv", ".git"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "config.settings.development"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 
 # --nomigrations: Don't run migrations on test DB
@@ -82,4 +83,4 @@ python_files = ["tests.py", "test_*.py", "*_tests.py"]
 # -s: Allow print statements in tests
 # -v: Verbose output
 # --ds: Specify Django settings module
-addopts = "--ds=config.settings.development --nomigrations --reuse-db -s"
+addopts = "--nomigrations --reuse-db -s"
