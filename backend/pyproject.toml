@@ -37,7 +37,7 @@ dev = [
 # Tool settings
 [tool.ruff]
 line-length = 88
-extend-exclude = ["**/migrations/**", "manage.py", "**/config/settings/**.py"]
+extend-exclude = ["manage.py"]
 
 
 [tool.ruff.lint]
@@ -55,7 +55,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"**/migrations/**" = ["F403", "F405"]
+"**/migrations/**" = ["F401", "F403", "F405", "E501"]
 "**/settings/**.py" = ["F403", "F405"]
 
 
