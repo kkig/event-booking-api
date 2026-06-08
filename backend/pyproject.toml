@@ -15,7 +15,6 @@ dependencies = [
     "gunicorn>=23.0.0",
     "psycopg[c]>=3.3.4",
     "python-decouple>=3.8",
-    "requests>=2.32.3",
 ]
 
 [dependency-groups]
