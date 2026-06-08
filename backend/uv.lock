@@ -312,13 +312,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=5.2.1" },
+    { name = "django", specifier = ">=6.0.0" },
     { name = "django-filter", specifier = ">=25.1" },
     { name = "djangorestframework", specifier = ">=3.16.0" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.5.0" },
     { name = "drf-nested-routers", specifier = ">=0.94.2" },
     { name = "drf-spectacular", specifier = ">=0.28.0" },
-    { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "gunicorn", specifier = ">=26.0.0" },
     { name = "psycopg", extras = ["c"], specifier = ">=3.3.4" },
     { name = "python-decouple", specifier = ">=3.8" },
 ]
@@ -327,10 +327,10 @@ requires-dist = [
 dev = [
     { name = "djlint", specifier = ">=1.36.4" },
     { name = "factory-boy", specifier = ">=3.3.3" },
-    { name = "faker", specifier = ">=37.3.0" },
+    { name = "faker", specifier = ">=40.0.0" },
     { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "pytest", specifier = ">=8.3.5" },
-    { name = "pytest-cov", specifier = ">=6.1.1" },
+    { name = "pytest", specifier = ">=9.0.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-django", specifier = ">=4.11.1" },
     { name = "pytest-factoryboy", specifier = ">=2.7.0" },
     { name = "pytest-mock", specifier = ">=3.14.1" },
