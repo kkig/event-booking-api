@@ -35,7 +35,6 @@ dev = [
 # Tool settings
 [tool.ruff]
 line-length = 88
-extend-exclude = ["manage.py"]
 
 
 [tool.ruff.lint]
