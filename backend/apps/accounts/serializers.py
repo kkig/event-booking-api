@@ -229,7 +229,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             # back to its original form (bytes), then force_str to convert to string.
             uid = force_str(urlsafe_base64_decode(data["uid"]))
             user = User._default_manager.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except TypeError, ValueError, OverflowError, User.DoesNotExist:
             raise serializers.ValidationError(
                 {"uid": PasswordMessasges.INVALID_UID_OR_NO_USER}
             ) from None
