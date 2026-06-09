@@ -28,6 +28,7 @@ dev = [
     "pytest-django>=4.11.1",
     "pytest-factoryboy>=2.7.0",
     "pytest-mock>=3.14.1",
+    "pytest-randomly>=4.1.0",
     "ruff>=0.15.13",
 ]
 
