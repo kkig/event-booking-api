@@ -1,7 +1,7 @@
 # ------------------------------------------------------------
 # Base Stage: Installs UV and Dependencies
 # ------------------------------------------------------------
-FROM python:3.13-slim AS base
+FROM python:3.14-slim AS base
 
 # Avoid writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -16,7 +16,9 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 
 # Disable uv's automatic downloading of Python versions. We rely on the base image's Python.
-ENV UV_PYTHON_DOWNLOADS=0
+# ENV UV_PYTHON_DOWNLOADS=0
+
+ENV UV_PYTHON_PREFERENCE=managed
 
 
 # Install required system dependencies.

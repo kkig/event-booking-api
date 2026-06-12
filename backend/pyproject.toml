@@ -4,7 +4,7 @@ name = "event-booking-api"
 version = "0.1.0"
 description = "Event Booking and management API"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "django>=6.0.0",
     "django-filter>=25.1",
@@ -28,9 +28,12 @@ dev = [
     "pytest-django>=4.11.1",
     "pytest-factoryboy>=2.7.0",
     "pytest-mock>=3.14.1",
+    "pytest-randomly>=4.1.0",
     "ruff>=0.15.13",
 ]
 
+[tool.uv]
+python-preference = "only-managed"
 
 # Tool settings
 [tool.ruff]
