@@ -6,6 +6,12 @@
   "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
 
   // Format the file automatically on save
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "always"
+    }
+  },
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -14,10 +20,6 @@
     },
   },
 
-  "files.associations": {
-    "**/templates/**/*.html": "django-html",
-    ".codespellrc": "init"
-  },
   // Django HTML formatting
   "[django-html]": {
     "editor.defaultFormatter": "monosans.djlint",
@@ -48,6 +50,13 @@
     "**/__pycache__",
     "**/.*"
   ],
+
+  "files.associations": {
+    "**/templates/**/*.html": "django-html",
+    ".codespellrc": "init",
+    "*.yml": "yaml",
+    "*.yaml": "yaml"
+  },
 
   // Exclude common cache and environment folders from explorer
   "files.exclude": {
