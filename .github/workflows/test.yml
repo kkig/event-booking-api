@@ -1,0 +1,65 @@
+name: "Run Tests"
+
+on:
+  push:
+    branches: [master, epic/**]
+  pull_request:
+    branches: [master, epic/**]
+
+# Cancels duplicate workflow runs for the same ref and workflow name.
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Set the working directory for all steps in this job
+        working-directory: ./backend
+
+    # Spin up a native Postgres container in the GHA runner
+    services:
+      postgres:
+        image: postgres:15 # Match local docker version
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_password
+        ports:
+          - 5432:5432
+        # Ensure postgres is healthy before starting steps
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+          version: "0.11.21"
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install the project dependencies
+        run: uv sync --frozen --dev
+
+      - name: Run Tests
+        # Dummy env vars for GitHub runner
+        env:
+          DATABASE_URL: postgres://postgres:postgres_password@localhost:5432/test_db
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_password
+          SECRET_KEY: "ci-secret-key-not-for-production-super-long-key"
+        run: uv run pytest --color=yes
