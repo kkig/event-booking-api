@@ -14,18 +14,21 @@ concurrency:
 jobs:
   lint-format:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Set the working directory for all steps in this job
+        working-directory: ./backend
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           # Automatically caches uv's virtual environments
           enable-cache: true
-          cache-dependency-glob: "backend/uv.lock"
-          python-version: "3.14"
+          version: "0.11.21"
 
       - name: Set up Python
         run: uv python install
