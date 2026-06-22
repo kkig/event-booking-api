@@ -1,0 +1,23 @@
+# Top-most EditorConfig file
+root = true
+
+# Global settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Overrides for Frontend apps (JavaScript/TypeScript/JSON/HTML)
+[*.{js,jsx,ts,tsx,json,html,css,scss}]
+indent_size = 2
+
+# Overrides for YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Overrides for Makefiles (Makefiles require tabs to function)
+[Makefile]
+indent_style = tab
