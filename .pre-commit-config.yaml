@@ -8,19 +8,28 @@ repos:
       - id: ruff-lint
         name: ruff lint
         # Using 'uv run' ensure it uses project's locked ruff version
-        entry: cd backend && uv run ruff check . --fix
+        entry: uv run --path backend ruff check --config backend/pyproject.toml --fix
         language: system
         types_or: [python, pyi]
 
       - id: ruff-format
         name: ruff format
-        entry: cd backend && uv run ruff format . --diff
+        entry: uv run --path backend ruff format --config backend/pyproject.toml --diff
         language: system
         types_or: [python, pyi]
 
       - id: docker-test
         name: docker-test
-        entry: make test
+        # Check if inside dev container,
+        # otherwise fall back to docker compose.
+        entry: >
+          bash -c '
+          if [ -d "/workspace" ] || [ "$REMOTE_CONTAINERS" = "true" ]; then
+            uv run pytest --color=yes
+          else
+            docker compose run --rm -T web uv run pytest --color=yes
+          fi
+          '
         language: system
         stages: [pre-push]
         # Don't pass filenames to this hook since it runs tests on the whole codebase
