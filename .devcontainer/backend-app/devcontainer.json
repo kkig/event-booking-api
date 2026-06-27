@@ -4,15 +4,13 @@
   // Service name from docker-compose.yml that holds Python app
   "service": "web",
   // Points to workplace folder for Docker - where the terminal starts
-  "workspaceFolder": "/workspace/backend",
+  "workspaceFolder": "/workspace",
   // Automate python package installation right after container creation
-  "postCreateCommand": "uv sync && uv tool install pre-commit --with pre-commit-uv && /root/.local/bin/pre-commit install --install-hooks",
+  "postCreateCommand": "uv sync --project backend && uv tool install pre-commit --with pre-commit-uv && /root/.local/bin/pre-commit install --install-hooks",
   // Configure tool-specific properties.
   "customizations": {
     // 1. For VS Code & Cursor users
     "vscode": {
-      // Workplace file for VS Code sidebar UI
-      "workspaceFile": "/workspace/project.code-workspace",
       "extensions": [
         "ms-python.python",
         "charliermarsh.ruff",
@@ -21,6 +19,11 @@
         "editorconfig.editorconfig"
       ],
       "settings": {
+        // Workplace file for VS Code sidebar UI
+        "workspace.workspaceFolders": [
+          { "path": "/workspace/backend", "name": "Backend App" },
+          { "path": "/workspace", "name": "Project Root (Config)" }
+        ],
         "editor.formatOnSave": true,
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff"
