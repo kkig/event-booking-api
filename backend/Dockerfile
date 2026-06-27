@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /workspace/backend
 
 # Install uv from the official image.
-COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /uvx /bin/
 
 # Copy only the dependency files first to leverage Docker caching.
 COPY ./backend/pyproject.toml ./backend/uv.lock ./
