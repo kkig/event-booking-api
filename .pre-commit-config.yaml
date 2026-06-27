@@ -25,7 +25,7 @@ repos:
         entry: >
           bash -c '
           if [ -d "/workspace" ] || [ "$REMOTE_CONTAINERS" = "true" ]; then
-            uv run pytest --color=yes
+            cd backend && uv run pytest --color=yes
           else
             docker compose run --rm -T web uv run pytest --color=yes
           fi
