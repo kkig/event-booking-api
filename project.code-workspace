@@ -9,7 +9,5 @@
             "name": "Global Configurations"
         }
     ],
-    "settings": {
-        "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
-    }
+    "settings": {}
 }

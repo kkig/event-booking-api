@@ -24,6 +24,7 @@
           { "path": "/workspace/backend", "name": "Backend App" },
           { "path": "/workspace", "name": "Project Root (Config)" }
         ],
+        "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
         "editor.formatOnSave": true,
         "[python]": {
           "editor.defaultFormatter": "charliermarsh.ruff"
