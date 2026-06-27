@@ -8,13 +8,13 @@ repos:
       - id: ruff-lint
         name: ruff lint
         # Using 'uv run' ensure it uses project's locked ruff version
-        entry: uv run --path backend ruff check --config backend/pyproject.toml --fix
+        entry: uv run --project backend ruff check --config backend/pyproject.toml --fix
         language: system
         types_or: [python, pyi]
 
       - id: ruff-format
         name: ruff format
-        entry: uv run --path backend ruff format --config backend/pyproject.toml --diff
+        entry: uv run --project backend ruff format --config backend/pyproject.toml --diff
         language: system
         types_or: [python, pyi]
 
