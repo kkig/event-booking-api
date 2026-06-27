@@ -62,7 +62,7 @@ rebuild:
 
 # Run all tests inside the container
 test:
-	docker compose run --rm -T $(WEB) pytest --color=yes
+	docker compose run --rm -T $(WEB) uv run pytest --color=yes
 
 # Run ruff to check for linting issues locally
 lint:
