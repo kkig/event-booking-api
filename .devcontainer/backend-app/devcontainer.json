@@ -30,6 +30,7 @@
             "name": "Project Root (Config)"
           }
         ],
+        "remote.SSH.enableAgentForwarding": true,
         "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
         "editor.formatOnSave": true,
         "[python]": {

@@ -39,6 +39,8 @@ ENV UV_PYTHON_PREFERENCE=managed
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    openssh-client \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure uv global tools are automatically available on the PATH
