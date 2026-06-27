@@ -6,7 +6,7 @@
   // Points to workplace folder for Docker - where the terminal starts
   "workspaceFolder": "/workspace",
   // Automate python package installation right after container creation
-  "postCreateCommand": "uv sync --project backend && uv tool install pre-commit --with pre-commit-uv && /root/.local/bin/pre-commit install --install-hooks",
+  "postCreateCommand": "bash .devcontainer/backend-app/post_create.sh",
   // Configure tool-specific properties.
   "customizations": {
     // 1. For VS Code & Cursor users
@@ -21,8 +21,14 @@
       "settings": {
         // Workplace file for VS Code sidebar UI
         "workspace.workspaceFolders": [
-          { "path": "/workspace/backend", "name": "Backend App" },
-          { "path": "/workspace", "name": "Project Root (Config)" }
+          {
+            "path": "/workspace/backend",
+            "name": "Backend App"
+          },
+          {
+            "path": "/workspace",
+            "name": "Project Root (Config)"
+          }
         ],
         "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
         "editor.formatOnSave": true,
