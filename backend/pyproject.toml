@@ -69,6 +69,10 @@ skip-magic-trailing-comma = false
 known-first-party = ["apps", "config"]
 
 
+[tool.djlint]
+profile = "django"
+
+
 [tool.codespell]
 skip = ["migrations", "venv", ".venv", ".git"]
 

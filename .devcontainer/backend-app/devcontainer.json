@@ -1,0 +1,55 @@
+{
+  "name": "Backend Environment (Python/Django/uv)",
+  "dockerComposeFile": "../../docker-compose.yml",
+  // Service name from docker-compose.yml that holds Python app
+  "service": "web",
+  // Points to workplace folder for Docker - where the terminal starts
+  "workspaceFolder": "/workspace",
+  // Automate python package installation right after container creation
+  "postCreateCommand": "bash .devcontainer/backend-app/post_create.sh",
+  // Configure tool-specific properties.
+  "customizations": {
+    // 1. For VS Code & Cursor users
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "redhat.vscode-yaml",
+        "monosans.djlint",
+        "editorconfig.editorconfig"
+      ],
+      "settings": {
+        // Workplace file for VS Code sidebar UI
+        "workspace.workspaceFolders": [
+          {
+            "path": "/workspace/backend",
+            "name": "Backend App"
+          },
+          {
+            "path": "/workspace",
+            "name": "Project Root (Config)"
+          }
+        ],
+        "remote.SSH.enableAgentForwarding": true,
+        "python.defaultInterpreterPath": "/workspace/backend/.venv/bin/python",
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "[django-html]": {
+          "editor.defaultFormatter": "monosans.djlint"
+        },
+        "prettier.configPath": "/workspace/.prettierignore"
+      }
+    },
+    // 2. For JetBrains (PyCharm) users
+    "jetbrains": {
+      "backend": "PyCharm",
+      "plugins": [
+        "com.jetbrains.python",
+        "charliermarsh.ruff",
+        "EditorConfig"
+      ]
+    }
+  }
+}

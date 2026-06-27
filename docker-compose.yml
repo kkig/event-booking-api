@@ -1,9 +1,9 @@
 services:
   web:
     build:
-      context: ./backend
+      context: .
+      dockerfile: ./backend/Dockerfile
       target: development
-      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     container_name: ticketing_web
@@ -13,11 +13,8 @@ services:
       - ALLOWED_HOSTS
       - DJANGO_SETTINGS_MODULE
     volumes:
-      # Live code sync for development.
-      - ./backend:/code
-      # Tell Docker to hide the .venv directory from the host
-      # Avoid confusion with the host's virtual environment
-      - /code/.venv
+      # Mount the entire repository root to expose config files.
+      - .:/workspace
     depends_on:
       - db
 
