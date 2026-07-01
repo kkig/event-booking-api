@@ -43,12 +43,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user to avoid running the container as root.
+ARG USERNAME=nonroot
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd \
+    --uid $USER_UID \
+    --gid $USER_GID \
+    --create-home \
+    --shell /bin/bash \
+    $USERNAME
+
+# Create writable directories for the non-root user.
+# Give the non-root user ownership of the working directory.
+RUN mkdir -p /workspace \
+    && chown -R nonroot:nonroot /workspace /home/nonroot
+
+# Switch to the non-root user.
+USER nonroot
+
+ENV HOME=/home/nonroot
+
 # Ensure uv global tools are automatically available on the PATH
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/home/nonroot/.local/bin:${PATH}"
 
 # Install project dependencies.
 # This stays cached unless pyproject.toml or uv.lock changes.
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,target=/home/nonroot/.cache/uv,uid=1000,gid=1000 \
     uv sync --frozen --no-install-project
 
 # In dev, we don't COPY the code because we use volumes in compose to sync the code.

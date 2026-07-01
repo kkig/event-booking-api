@@ -5,6 +5,9 @@
   "service": "web",
   // Points to workplace folder for Docker - where the terminal starts
   "workspaceFolder": "/workspace",
+  // Use non-root user for container (defined in Dockerfile)
+  "remoteUser": "nonroot",
+  "updateRemoteUserUID": true,
   // Automate python package installation right after container creation
   "postCreateCommand": "bash .devcontainer/backend-app/post_create.sh",
   // Configure tool-specific properties.
