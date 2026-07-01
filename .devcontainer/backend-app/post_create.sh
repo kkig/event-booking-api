@@ -1,6 +1,7 @@
 #!/bin/bash
 # Package management
-uv sync --project backend
+cd /workspace/backend
+uv sync
 
 # Security & Quality tooling
 uv tool install pre-commit --with pre-commit-uv
