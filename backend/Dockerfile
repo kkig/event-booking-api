@@ -69,11 +69,6 @@ ENV HOME=/home/nonroot
 # Ensure uv global tools are automatically available on the PATH
 ENV PATH="/home/nonroot/.local/bin:${PATH}"
 
-# Install project dependencies.
-# This stays cached unless pyproject.toml or uv.lock changes.
-RUN --mount=type=cache,target=/home/nonroot/.cache/uv,uid=1000,gid=1000 \
-    uv sync --frozen --no-install-project
-
 # In dev, we don't COPY the code because we use volumes in compose to sync the code.
 CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
