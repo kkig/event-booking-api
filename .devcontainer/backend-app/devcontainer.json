@@ -8,6 +8,14 @@
   // Use non-root user for container (defined in Dockerfile)
   "remoteUser": "nonroot",
   "updateRemoteUserUID": true,
+  "portsAttributes": {
+    "8000": {
+      "onAutoForward": "ignore"
+    },
+    "5432": {
+      "onAutoForward": "ignore"
+    }
+  },
   // Automate python package installation right after container creation
   "postCreateCommand": "bash .devcontainer/backend-app/post_create.sh",
   // Configure tool-specific properties.
