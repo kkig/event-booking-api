@@ -11,6 +11,8 @@ echo "Installing pre-commit hooks..."
 if ! command -v pre-commit >/dev/null; then
     uv tool install pre-commit --with pre-commit-uv
 fi
+
+cd /workspace
 pre-commit install --install-hooks
 
 echo "Done."
