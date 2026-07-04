@@ -27,3 +27,12 @@ repos:
         # Use pyproject.toml for config
         additional_dependencies: ["toml"]
         files: \.(py|md|txt)$
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version
+    rev: 0.11.26
+    hooks:
+      # Make sure uv.lock is up to date even if pyproject.toml file was changed.
+      - id: uv-lock
+        args: ["--project=backend"]
+        files: ^backend/pyproject.toml$
