@@ -1,26 +1,12 @@
 # Event Ticketing / Booking API
 
-![Python](https://img.shields.io/badge/python-3.13-blue)
+![Python](https://img.shields.io/badge/python-3.14-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Lint Checks](https://github.com/kkig/event-booking-api/actions/workflows/lint.yml/badge.svg)
 
 A backend REST API built with Django REST Framework and JWT authentication to manage events, ticket types, and bookings with concurrency-safe logic.
 Designed for multi-ticket bookings, capacity management, and robust concurrency control using database transactions and row-level locking.
 
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup & Installation](#setup--installation)
-- [User Roles](#user-roles)
-- [API Endpoints Overview](#api-endpoints-overview)
-- [API Documentation](#api-documentation)
-- [Concurrency Handling](#concurrency-handling)
-- [Running Tests](#running-tests)
-- [Makefile Commands](#makefile-commands)
-- [Pre-commit Hooks](#pre-commit-hooks)
-- [CI / CD](#ci--cd)
-- [Future Improvements](#future-improvements)
 
 ## Features
 
@@ -32,114 +18,75 @@ Designed for multi-ticket bookings, capacity management, and robust concurrency 
 - Booking cancellation that releases ticket availability
 - Comprehensive automated tests simulating real-world concurrency scenarios
 
+
 ## Tech Stack
 
-- Python 3.13, Django 5.2.1
+- Python 3.14
 - Django REST Framework
-- PostgreSQL (leveraging row-level locking and transactions)
-- Redis (used for Celery and caching if added later)
-- Pytest for testing, including concurrency tests with threading
-- drf-spectacular for auto-generated OpenAPI docs
-- Optional:
-  - Docker and Docker Compose (for containerized setup)
+- uv
+- PostgreSQL
+- Docker & Docker Compose
 
-## Setup & Installation
 
-### Prerequisites
+## Project Structure
+This repository is organized as a monorepo.
 
-- Python 3.13
-- [uv (Python package manager)](https://docs.astral.sh/uv/getting-started/installation/)
-- PostgreSQL (with a database and user ready)
-- Docker and Docker Compose
-- make (Required for Makefile commands.)
+```text
+.
+├── backend/           # Django application
+├── docs/              # Project documentation
+├── .devcontainer/     # Dev Container configuration
+├── docker-compose.yml # Local development stack
+├── Makefile           # Infrastructure commands
+└── README.md
+```
 
-### Installation Steps
+The Django project and all Python tooling (`pyproject.toml`, `uv.lock`, virtual environment, etc.) live inside the `backend/` directory.
 
-1. Clone the repo:
+
+## Getting Started
+
+1. Clone the repository.
    ```bash
    git clone https://github.com/kkig/event-booking-api.git
    cd event-booking-api
    ```
-2. Create a `.env` file based on `.env.example` and update environment variables as needed.
-3. Create a local virtual environment (`backend/.venv`). This is required to use local tools.
-   ```bash
-   uv sync --directory backend
-   ```
-4. Install hooks for local development:
-   ```bash
-   uv run pre-commit install --hook-type pre-commit --hook-type pre-push
-   ```
-   **What it does:**
-   - It sets up a standard hook file inside the hidden `.git/hooks/pre-commit` folder to intercept `git commit`.
-   - It sets up a second hook file inside `.git/hooks/pre-push` to intercept `git push`.
+2. Create a `.env` file from `.env.example`.
 
-   **How to test hooks:**
-   ```bash
-   # Test pre-commit hooks
-   uv run pre-commit run --all-files
+Choose one of the following development workflows:
 
-   # Test pre-push hooks
-   uv run pre-commit run --hook-stage pre-push --all-files
-   ```
-5. Run database migrations:
-   ```bash
-   make migrate
-   ```
+- **Development Container (recommended)** - a fully configured development environment with Python, `uv`, PostgreSQL connectivity, and development tools already installed.
+- **Local Development** - install and manage the development environment on your own machine.
 
-### Run App
-1. Start app:
-   ```bash
-   make up-detach
-   ```
-2. The API server will be accessible at `http://localhost:8000` by default. For example, `http://localhost:8000/api/events/`.
-3. To stop app:
-   ```bash
-   make down
-   ```
+For detailed setup instructions, see [Development Guide](docs/development.md).
+
+
+## Running the Application
+
+Start the development environment:
+```bash
+make up
+```
+To stop app:
+```bash
+make down
+```
+
+The API is available at:
+`http://localhost:8000`
+
+
+## Documentation
+
+- [Development Guide](docs/development.md)
+- [Architecture](docs/architecture.md)
+
 
 ## User Roles
 
 - **Organizer** – Can create and manage events and ticket types.
 - **Attendee** – Can browse events and make/cancel bookings.
 
-## API Endpoints Overview
-
-### Accounts
-
-| Endpoint                                             | Method | Description                              | Auth Required |
-| ---------------------------------------------------- | ------ | ---------------------------------------- | ------------- |
-| `/api/auth/register/`                                | POST   | Create new account                       | No            |
-| `/api/auth/login/`                                   | POST   | Log in user                              | No            |
-| `/api/auth/token/refresh/`                           | POST   | Exchange access token with refresh token | No            |
-| `/api/auth/profile/`                                 | GET    | Retrieve details of the user             | Yes           |
-| `/api/auth/profile/`                                 | PUT    | Update details of the user               | Yes           |
-| `/api/auth/change-password/`                         | POST   | Reset password                           | Yes           |
-| `/api/auth/password-reset-request/`                  | POST   | Initiate password reset flow             | No            |
-| `/api/auth/password-reset-confirm/{uidb64}/{token}/` | POST   | Reset password                           | No            |
-| `/api/auth/deactivate-account/`                      | DELETE | Deactivate user account                  | Yes           |
-
-### Bookings
-
-| Endpoint                     | Method | Description                 | Auth Required  |
-| ---------------------------- | ------ | --------------------------- | -------------- |
-| `/api/bookings/`             | POST   | Create a new booking        | Yes (Attendee) |
-| `/api/bookings/{id}/`        | GET    | Retrieve details of booking | Yes (Owner)    |
-| `/api/bookings/{id}/cancel/` | PUT    | Cancel an existing booking  | Yes (Owner)    |
-| `/api/users/me/bookings/`    | GET    | List all bookings           | Yes (Owner)    |
-
-### Events
-
-| Endpoint                        | Method | Description                    | Auth Required   |
-| ------------------------------- | ------ | ------------------------------ | --------------- |
-| `/api/events/`                  | GET    | List active/upcoming events    | No              |
-| `/api/events/`                  | POST   | Create events                  | Yes (Organizer) |
-| `/api/events/{id}/`             | GET    | Retrieve event details         | No              |
-| `/api/events/{id}/`             | PATCH  | Update event details           | Yes (Owner)     |
-| `/api/events/{id}/`             | DELETE | Delete event                   | Yes (Owner)     |
-| `/api/events/{id}/ticket-types` | GET    | List ticket types for an event | No              |
-| `/api/events/{id}/ticket-types` | POST   | Create a ticket type for event | Yes (Owner)     |
-
-_Note: Authentication uses token-based auth (JWT) for securing endpoints._
 
 ## API Documentation
 
@@ -151,146 +98,9 @@ Interactive API docs are available once the server is running:
 | Swagger UI     | `/api/docs/swagger` | Interactive Swagger documentation |
 | ReDoc UI       | `/api/docs/redoc`   | Interactive ReDoc documentation   |
 
-These routes are powered by [drf-spectacular](https://drf-spectacular.readthedocs.io/), and automatically generated based on your serializers, views, and schema annotations.
-
 > 🔐 To authorize in Swagger UI, click the "Authorize" button and enter your JWT token as:
 > `Bearer <your-token>`
 
-## Concurrency Handling
-
-To prevent overbooking under concurrent booking attempts:
-
-- All booking creations run inside `transaction.atomic()` blocks.
-- Ticket types and events are locked with `select_for_update()` to ensure row-level locking.
-- Ticket availability and event capacity are checked and updated atomically.
-- Automated tests simulate concurrent booking attempts with multiple threads, ensuring that only one booking succeeds when capacity is limited.
-
-### Booking Flow
-
-[Mermaid sequence diagram](https://mermaid.live) that visualizes booking creation flow with concurrency control.
-
-<details>
-sequenceDiagram
-    participant A as Attendee
-    participant C as API Server
-    participant D as Database
-
-    A->>C: POST /api/bookings/
-    C->>C: Begin transaction.atomic()
-    C->>D: SELECT TicketType FOR UPDATE
-    C->>D: SELECT Event FOR UPDATE
-    C->>D: Check availability & capacity
-
-    alt Tickets Available
-        C->>D: Create Booking
-        C->>D: Set Booking status to CONFIRMED
-        C->>D: Decrement TicketType.quantity_available
-        C->>D: Increment TicketType.quantity_sold
-        C->>D: Commit Transaction
-        C-->>A: 201 Created (Booking Confirmed)
-    else Sold Out
-        C->>D: Rollback Transaction
-        C-->>A: 400 Bad Request (Sold Out)
-    end
-
-</details>
-
-### Booking Cancellation Flow
-
-[Mermaid sequence diagram](https://mermaid.live) that visualizes booking cancellation flow with concurrency control.
-
-<details>
-sequenceDiagram
-    participant A as Attendee
-    participant C as API Server
-    participant D as Database
-
-    A->>C: PUT /api/bookings/:id/
-    C->>C: Check auth and ownership
-    C->>D: Begin transaction.atomic()
-    C->>D: Lock Booking (SELECT ... FOR UPDATE)
-    C->>D: Check Booking status
-    alt Already cancelled
-        C-->>A: 400 Bad Request (already cancelled)
-    else Valid cancellation
-        C->>D: Update Booking status to CANCELLED
-        C->>D: Increment TicketType.quantity_available
-        C->>D: Decrement TicketType.quantity_sold
-        C->>D: Commit transaction
-        C-->>A: 200 OK (cancelled)
-    end
-
-</details>
-
-## Running Tests
-
-Run tests:
-
-```bash
-make test
-```
-
-### Concurrency Test Suite
-
-A key aspect of this API is its robust handling of concurrent booking requests. The test suite includes specific tests designed to validate the system's behavior under high-stress, simultaneous interactions.
-
-These tests utilize Python's `threading` module within Pytest to simulate multiple users attempting to book tickets concurrently. They ensure that:
-
-- **No Overbooking:** Even with multiple simultaneous requests, the system prevents tickets from being oversold beyond available capacity
-- **Race Condition Prevention:** Scenarios like two users attempting to book the very last available ticket are handled correctly, with only one request succeeding.
-- **Shared Capacity Management:** Tests cover situations where different ticket types contribute to a single event's overall capacity, ensuring accurate availability updates across types.
-- **Atomic Operations:** Verifies that critical operations (booking creation, quantity updates, cancellations) are atomic and concurrency-safe, leveraging PostgreSQL's row-level locking (`select_for_update()`) and Django's `transaction.atomic()` blocks.
-- **Cancellation Releasing Tickets:** Confirms that cancelling a booking correctly frees up ticket availability for other users to book immediately.
-
-These dedicated concurrency tests provide strong confidence in the API's reliability under real-world usage patterns.
-
-## Makefile Commands
-
-This project includes a `Makefile` to simplify common development tasks:
-
-### Development
-
-| Command           | Description                          |
-| ----------------- | ------------------------------------ |
-| `make up`         | Start all services in the foreground |
-| `make up-detach`  | Start all services in detached mode  |
-| `make down`       | Stop and remove containers           |
-| `make build`      | Build containers                     |
-| `make rebuild`    | Rebuild containers without cache     |
-
-### Django Management
-
-| Command                | Description                            |
-| ---------------------- | -------------------------------------- |
-| `make migrate`         | Apply database migrations              |
-| `make migrations`      | Create new migration files             |
-| `make createsuperuser` | Create Django superuser                |
-| `make shell`           | Open Django shell inside the container |
-
-### Testing
-
-| Command           | Description                           |
-| ----------------- | ------------------------------------- |
-| `make test`       | Run tests in Docker (Required for DB) |
-
-### Local Tools
-
-| Command            | Description                                |
-| ------------------ | ------------------------------------------ |
-| `make lint`        | Check for linting issues                   |
-| `make lint-fix`    | Check and fix fixable issues               |
-| `make format`      | Auto-format code using style guidelines    |
-| `make format-diff` | See how the formatted code would look like |
-| `make spellcheck`  | Run spell checks                           |
-
-
-## Pre-commit Hooks
-
-This project uses [pre-commit](https://pre-commit.com/) to ensure code quality by running linters and formatters automatically before each commit. The hooks are defined in `.pre-commit-config.yaml`.
-
-## CI / CD
-
-This project uses GitHub Actions to automatically check code formatting and linting. The workflow runs on every push and PR to `master`. The scripts are in `.github/workflows/lint.yml`.
 
 ## Future Improvements
 
@@ -298,6 +108,7 @@ This project uses GitHub Actions to automatically check code formatting and lint
 - Add rate limiting to prevent abuse
 - Enhance error response standardization
 - Expand user role management (organizer vs attendee)
+
 
 ## License
 
