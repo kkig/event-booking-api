@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "timezone": "Asia/Tokyo",
+  "schedule": [
+    "before 8am on monday"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "groupName": "pre-commit hooks"
+    },
+    {
+      "matchDepTypes": [
+        "dev"
+      ],
+      "groupName": "Python dev dependencies"
+    },
+    {
+      "matchPackageNames": [
+        "django"
+      ],
+      "groupName": "Django"
+    }
+  ]
+}
