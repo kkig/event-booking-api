@@ -1,4 +1,4 @@
-name: "Lint & Format Checks"
+name: "CI pipeline"
 
 on:
   push:
@@ -14,10 +14,6 @@ concurrency:
 jobs:
   lint-format:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        # Set the working directory for all steps in this job
-        working-directory: ./backend
 
     steps:
       - name: Checkout code
@@ -28,15 +24,13 @@ jobs:
         with:
           # Automatically caches uv's virtual environments
           enable-cache: true
-          version: "0.11.21"
+          version: "0.11.27"
 
       - name: Set up Python
         run: uv python install
 
-      - name: Run Ruff Lint
-        run: uv run --frozen ruff check .
-        working-directory: backend
+      - name: Install dependencies
+        run: uv sync --project backend --frozen --dev
 
-      - name: Run Ruff Format
-        run: uv run --frozen ruff format . --check
-        working-directory: backend
+      - name: Run pre-commit hooks
+        run: uv run --project backend --frozen pre-commit run --all-files
