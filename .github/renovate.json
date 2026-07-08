@@ -35,6 +35,13 @@
         "django"
       ],
       "groupName": "Django"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "groupName": "Docker images"
     }
   ]
 }
