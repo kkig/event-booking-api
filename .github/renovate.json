@@ -31,10 +31,26 @@
       "groupName": "Python dev dependencies"
     },
     {
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "excludePackageNames": [
+        "django"
+      ],
+      "groupName": "Python prod dependencies"
+    },
+    {
       "matchPackageNames": [
         "django"
       ],
       "groupName": "Django"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "groupName": "Docker images"
     }
   ]
 }
