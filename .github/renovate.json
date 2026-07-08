@@ -31,6 +31,15 @@
       "groupName": "Python dev dependencies"
     },
     {
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "excludePackageNames": [
+        "django"
+      ],
+      "groupName": "Python prod dependencies"
+    },
+    {
       "matchPackageNames": [
         "django"
       ],
