@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.14-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Lint Checks](https://github.com/kkig/event-booking-api/actions/workflows/lint.yml/badge.svg)
+![Lint Checks](https://github.com/kkig/event-booking-api/actions/workflows/ci.yml/badge.svg)
 
 A backend REST API built with Django REST Framework and JWT authentication to manage events, ticket types, and bookings with concurrency-safe logic.
 Designed for multi-ticket bookings, capacity management, and robust concurrency control using database transactions and row-level locking.
