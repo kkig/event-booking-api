@@ -22,7 +22,7 @@ jobs:
     # Spin up a native Postgres container in the GHA runner
     services:
       postgres:
-        image: postgres:15 # Match local docker version
+        image: postgres:18.4 # Match local docker version
         env:
           POSTGRES_DB: test_db
           POSTGRES_USER: postgres
