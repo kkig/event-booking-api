@@ -12,20 +12,35 @@ WEB=web
 
 # Start all services (foreground)
 up:
-	docker compose up
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	up --build
 
 # Start all services (detached mode)
 up-detach:
-	docker compose up -d
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	up --build -d
 
 # Stop all services and remove containers
 down:
-	docker compose down
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	down
 
 # Build all containers
 build:
-	docker compose build
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	build
 
 # Rebuild containers from scratch (no cache)
 rebuild:
-	docker compose build --no-cache
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	build --no-cache
