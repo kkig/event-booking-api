@@ -169,7 +169,7 @@
     - **API/End-to-End Tests:** Use a tool (e.g., Postman/Newman, Supertest) to test your API endpoints. Test various scenarios, including valid requests, invalid inputs, unauthorized access, and concurrency attempts.
 6.  **Dockerization:**
     - Create a `Dockerfile` for your API.
-    - Create a `docker-compose.yml` to spin up your API, database, and Redis/message queue with a single command. This makes your project incredibly easy for others to run.
+    - Create a `compose.yml` to spin up your API, database, and Redis/message queue with a single command. This makes your project incredibly easy for others to run.
 7.  **Advanced Error Handling & Logging:**
     - Implement a centralized error handling mechanism (middleware, global exception handler).
     - Use a proper logging library to log requests, errors, and critical business events.

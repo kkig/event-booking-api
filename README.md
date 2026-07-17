@@ -36,7 +36,7 @@ This repository is organized as a monorepo.
 ├── backend/           # Django application
 ├── docs/              # Project documentation
 ├── .devcontainer/     # Dev Container configuration
-├── docker-compose.yml # Local development stack
+├── compose.yml # Local development stack
 ├── Makefile           # Infrastructure commands
 └── README.md
 ```

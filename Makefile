@@ -2,7 +2,7 @@
 # Docker Commands
 # -----------------------------------------------------------------------------
 
-# Docker service name (as defined in docker-compose.yml)
+# Docker service name (as defined in compose.yml)
 WEB=web
 
 # Tells Make to always run the specified targes,
