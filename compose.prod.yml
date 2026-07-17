@@ -18,4 +18,5 @@ services:
       --workers 4
 
   db:
+    # Replace with an external database service
     restart: unless-stopped
