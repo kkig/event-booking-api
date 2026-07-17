@@ -1,6 +1,6 @@
 {
   "name": "Backend Environment (Python/Django/uv)",
-  "dockerComposeFile": "../../docker-compose.yml",
+  "dockerComposeFile": ["../../compose.yml", "../../compose.dev.yml"],
   // Service name from docker-compose.yml that holds Python app
   "service": "web",
   // Points to workplace folder for Docker - where the terminal starts
