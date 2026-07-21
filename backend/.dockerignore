@@ -33,7 +33,9 @@ build
 
 # Docker
 Dockerfile
-docker-compose.yml
+compose.yml
+compose.dev.yml
+compose.prod.yml
 .dockerignore
 
 # Logs

@@ -1,0 +1,22 @@
+services:
+  web:
+    build:
+      target: production
+
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DEBUG: "0"
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+    command: >
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 4
+
+  db:
+    # Replace with an external database service
+    restart: unless-stopped

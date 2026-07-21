@@ -1,0 +1,21 @@
+services:
+  web:
+    build:
+      target: development
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - .:/workspace
+
+    environment:
+      DEBUG: "1"
+      DJANGO_SETTINGS_MODULE: config.settings.development
+
+    command: >
+      uv run python manage.py runserver 0.0.0.0:8000
+
+  db:
+    ports:
+      - "5432:5432"

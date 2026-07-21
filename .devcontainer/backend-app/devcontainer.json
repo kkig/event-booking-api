@@ -1,7 +1,10 @@
 {
   "name": "Backend Environment (Python/Django/uv)",
-  "dockerComposeFile": "../../docker-compose.yml",
-  // Service name from docker-compose.yml that holds Python app
+  "dockerComposeFile": [
+    "../../compose.yml",
+    "../../compose.dev.yml"
+  ],
+  // Service name from compose.yml that holds Python app
   "service": "web",
   // Points to workplace folder for Docker - where the terminal starts
   "workspaceFolder": "/workspace",
@@ -17,7 +20,7 @@
     }
   },
   // Automate python package installation right after container creation
-  "postCreateCommand": "bash /workspace/.devcontainer/backend-app/post_create.sh",
+  "postCreateCommand": "bash /workspace/.scripts/bootstrap.sh",
   // Configure tool-specific properties.
   "customizations": {
     // 1. For VS Code & Cursor users
