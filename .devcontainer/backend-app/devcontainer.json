@@ -20,7 +20,7 @@
     }
   },
   // Automate python package installation right after container creation
-  "postCreateCommand": "bash /workspace/.devcontainer/backend-app/post_create.sh",
+  "postCreateCommand": "bash /workspace/.scripts/bootstrap.sh",
   // Configure tool-specific properties.
   "customizations": {
     // 1. For VS Code & Cursor users
