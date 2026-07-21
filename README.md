@@ -57,7 +57,7 @@ The Django project and all Python tooling (`pyproject.toml`, `uv.lock`, virtual 
 
 Choose one of the following development workflows:
 
-- **Development Container (recommended)** - a fully configured development environment with Python, `uv`, PostgreSQL connectivity, and development tools already installed.
+- **Development Container** - quickest way to get started. Automatically configure development environment with required tools.
 - **Local Development** - install and manage the development environment on your own machine.
 
 For detailed setup instructions, see [Development Guide](docs/development.md).

@@ -5,7 +5,7 @@ This is guide for setting up and developing in your environment.
 
 ## Development workflows
 
-### Option A: Development Container (Recommended)
+### Option A: Development Container
 
 #### Prerequisites
 
