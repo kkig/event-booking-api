@@ -32,7 +32,6 @@ The development container automatically:
 
 - Python 3.14
 - [uv (Python package manager)](https://docs.astral.sh/uv/getting-started/installation/)
-- PostgreSQL (with a database and user ready)
 - Docker
 - make (optional, for infrastructure commands)
 
