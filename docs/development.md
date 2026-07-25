@@ -37,18 +37,12 @@ The development container automatically:
 
 #### Setup
 
-1. Create a local virtual environment (`backend/.venv`). This is required to use local tools.
-   ```bash
-   cd backend
-   uv sync
-   ```
-2. Install hooks for local development:
-   ```bash
-   uv tool install pre-commit --with pre-commit-uv
-   pre-commit install --install-hooks
-   ```
+1. Bootstrap development environment:
+    ```bash
+    .scripts/bootstrap.sh
+    ```
 
-3. Run database migrations:
+2. Run database migrations:
    ```bash
    cd backend
    uv run manage.py migrate
