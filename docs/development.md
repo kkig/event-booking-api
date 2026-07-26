@@ -39,7 +39,7 @@ The development container automatically:
 
 1. Bootstrap development environment:
     ```bash
-    .scripts/bootstrap.sh
+    scripts/bootstrap.sh
     ```
 
 2. Run database migrations:
