@@ -39,7 +39,7 @@ This repository is organized as a monorepo.
 ├── scripts           # Scripts
 ├── compose.yml        # Base development stack
 ├── compose.dev.yml    # Local development stack
-├── compose.dev.yml    # Production development stack
+├── compose.prod.yml   # Production stack
 ├── Makefile           # Infrastructure commands
 └── README.md
 ```
