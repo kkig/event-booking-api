@@ -14,14 +14,6 @@ TEMPLATES += []
 # Development-specific middleware (if using debug toolbar)
 MIDDLEWARE += []
 
-# Optionally override database settings
-DATABASES["default"].update(
-    {
-        "HOST": config("POSTGRES_HOST", default="db"),  # Docker service name
-        "PORT": config("POSTGRES_PORT", default="5432"),
-    }
-)
-
 # === Email configuration for Development ===
 
 # Prints emails to console
