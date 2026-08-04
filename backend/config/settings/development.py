@@ -4,13 +4,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 
-# Development-specific sinstalled apps(e.g. for Django Debug Toolbar)
-INSTALLED_APPS += []
-
-TEMPLATES += []
-
-# Development-specific middleware (if using debug toolbar)
-MIDDLEWARE += []
 
 # === Email configuration for Development ===
 
