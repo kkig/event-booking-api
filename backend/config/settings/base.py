@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="unsafe-default-key")
+SECRET_KEY = config("SECRET_KEY")
 
 # Application definition
 
@@ -82,9 +82,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("POSTGRES_DB", default="expense_db"),
-        "USER": config("POSTGRES_USER", default="expense_user"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default="expense_pass"),
+        "NAME": config("POSTGRES_DB"),
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
         "HOST": config("POSTGRES_HOST"),
         "PORT": config("POSTGRES_PORT"),
     }
