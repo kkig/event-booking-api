@@ -10,7 +10,6 @@ services:
       - .:/workspace
 
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.development
       POSTGRES_HOST: db
 
     command: >
