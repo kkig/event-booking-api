@@ -12,10 +12,3 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost")
 INSTALLED_APPS += []
 
 MIDDLEWARE += []
-
-DATABASES["default"].update(
-    {
-        "HOST": config("POSTGRES_HOST", default="db"),
-        "PORT": config("POSTGRES_PORT", default="5432"),
-    }
-)

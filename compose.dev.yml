@@ -12,6 +12,7 @@ services:
     environment:
       DEBUG: "1"
       DJANGO_SETTINGS_MODULE: config.settings.development
+      POSTGRES_HOST: db
 
     command: >
       uv run python manage.py runserver 0.0.0.0:8000
