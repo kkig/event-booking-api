@@ -2,8 +2,7 @@ from .base import *
 
 DEBUG = True
 
-# Overrides ALLOWED_HOSTS (from .env) for development
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 
 # Development-specific sinstalled apps(e.g. for Django Debug Toolbar)
 INSTALLED_APPS += []
