@@ -1,18 +1,9 @@
 from .base import *
 
-# Overrides DEBUG (from .env) for development
-DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = True
 
-# Overrides ALLOWED_HOSTS (from .env) for development
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
 
-# Development-specific sinstalled apps(e.g. for Django Debug Toolbar)
-INSTALLED_APPS += []
-
-TEMPLATES += []
-
-# Development-specific middleware (if using debug toolbar)
-MIDDLEWARE += []
 
 # === Email configuration for Development ===
 

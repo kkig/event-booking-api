@@ -9,7 +9,6 @@ services:
       - "8000:8000"
 
     environment:
-      DEBUG: "0"
       DJANGO_SETTINGS_MODULE: config.settings.production
 
     command: >
