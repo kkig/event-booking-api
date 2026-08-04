@@ -1,7 +1,6 @@
 from .base import *
 
-# Overrides DEBUG (from .env) for development
-DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = True
 
 # Overrides ALLOWED_HOSTS (from .env) for development
 ALLOWED_HOSTS = ["*"]

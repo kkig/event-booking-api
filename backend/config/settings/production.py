@@ -1,7 +1,7 @@
 from .base import *
 
 # DEBUG must be False in production
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = False
 
 # ALLOWED_HOSTS must be explicitly set to your production domain(s)
 # It's best to read these from an OS environment variable in production
