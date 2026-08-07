@@ -79,7 +79,7 @@ skip = ["migrations", "venv", ".venv", ".git"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-DJANGO_SETTINGS_MODULE = "config.settings.development"
+DJANGO_SETTINGS_MODULE = "config.settings.testing"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 
 # --nomigrations: Don't run migrations on test DB
