@@ -7,7 +7,7 @@ WEB=web
 
 # Tells Make to always run the specified targes,
 # even if folders/files with the same name exist in the root directory.
-.PHONY: up up-detach down build rebuild
+.PHONY: up up-detach down build rebuild db
 
 
 # Start all services (foreground)
@@ -44,3 +44,10 @@ rebuild:
 		-f compose.yml \
 		-f compose.dev.yml \
 	build --no-cache
+
+# Run db container
+db:
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	up -d db
