@@ -45,9 +45,22 @@ rebuild:
 		-f compose.dev.yml \
 	build --no-cache
 
-# Run db container
+# Run db container only (foreground)
 db:
 	docker compose \
 		-f compose.yml \
 		-f compose.dev.yml \
+	up db
+
+# Run db container only (detached mode)
+db-detach:
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
 	up -d db
+
+db-down:
+	docker compose \
+		-f compose.yml \
+		-f compose.dev.yml \
+	down db
