@@ -1,24 +1,35 @@
-labels:
-  - label: features
-    paths:
-      - jobs/**
-      - analytics/**
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/**
 
-  - label: bugfix
-    paths:
-      - fixes/**
-      - "**/bug_*"
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**
+          - "*.md"
 
-  - label: docs
-    paths:
-      - "*.md"
-      - docs/**
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+          - .github/labeler.yml
+          - .github/auto_assign.yml
 
-  - label: chore
-    paths:
-      - .github/**
-      - .pre-commit-config.yaml
+devcontainer:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .devcontainer/**
 
-  - label: refactor
-    paths:
-      - "*/refactor_*"
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - compose.yml
+          - compose.*.yml
+          - .dockerignore
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - backend/pyproject.toml
+          - backend/uv.lock
