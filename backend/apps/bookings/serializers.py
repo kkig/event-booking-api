@@ -20,19 +20,22 @@ class BookingSerializer(serializers.Serializer):
     # Field level validations
     # A booking can have many ticket types (e.g., Standard, Premium)
     event_id = serializers.IntegerField()
-    items = BookingItemInputSerializer(many=True)
+    items = BookingItemInputSerializer(many=True, allow_empty=False)
 
     def validate(self, data):
         """
-        Lightweight validation. Non-concurrent sensitive.
+        Request-level validation. Non-concurrent sensitive.
         - Ticket types exist
-        - Belong to the same event
+        - Belong to the same event etc.
         """
         event_id = data["event_id"]
         items = data["items"]
 
         # Get array of all ticket type ids
         ticket_type_ids = [item["ticket_type_id"] for item in items]
+
+        if len(ticket_type_ids) != len(set(ticket_type_ids)):
+            raise serializers.ValidationError(BookingMessages.DUPLICATE_TICKET_TYPE)
 
         # Get array of ticket type data from database
         # Django will SQL JOIN TicketType and event(FK) beforehand
@@ -41,12 +44,12 @@ class BookingSerializer(serializers.Serializer):
         )
 
         # Make sure all ticket types are available in database
-        if len(ticket_types) != len(items):
+        if len(ticket_types) != len(ticket_type_ids):
             raise serializers.ValidationError(BookingMessages.INVALID_TICKET_TYPE)
 
         # All ticket types should be for the same event
-        for tt in ticket_types:
-            if tt.event.pk != event_id:
+        for ticket_type in ticket_types:
+            if ticket_type.event.pk != event_id:
                 raise serializers.ValidationError(
                     BookingMessages.INVALID_BOOK_FOR_EVENTS
                 )
