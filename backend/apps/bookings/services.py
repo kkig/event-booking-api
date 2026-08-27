@@ -43,9 +43,7 @@ def create_booking(*, user, event_id, items, ticket_type_ids):
             raise ValidationError(BookingMessages.INACTIVE_TICKET_TYPE)
 
         if ticket_type.quantity_available < quantity:
-            raise ValidationError(
-                f"Not enough tickets available for {ticket_type.name}."
-            )
+            raise ValidationError(BookingMessages.NOT_ENOUGH_TICKETS)
 
     total_price = sum(
         item["quantity"] * ticket_map[item["ticket_type_id"]].price for item in items

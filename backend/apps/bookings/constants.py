@@ -3,3 +3,4 @@ class BookingMessages:
     INVALID_BOOK_FOR_EVENTS = "All ticket types must belong to the same event."
     QUANTITY_EXCEED_CAPACITY = "Booking exceeds event capacity or ticket availability."
     INACTIVE_TICKET_TYPE = "The ticket type is not available."
+    NOT_ENOUGH_TICKETS = "Not enough tickets available for the requested ticket type."
