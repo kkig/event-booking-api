@@ -239,12 +239,20 @@ class TestEventFiltering:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == event1.id
 
-    def test_filter_events_by_text_search(self, api_client, event_factory):
+    def test_filter_events_by_text_search_in_name(self, api_client, event_factory):
         """
-        Test that we can filter events by test search.
+        Test that we can filter events by text search in name.
         """
-        event1 = event_factory(name="Katamari Rock", status=EventStatus.UPCOMING)
-        _ = event_factory(name="Katamari Pop", status=EventStatus.UPCOMING)
+        event1 = event_factory(
+            name="Katamari Rock",
+            status=EventStatus.UPCOMING,
+            description="A music event",
+        )
+        _ = event_factory(
+            name="Katamari Pop",
+            status=EventStatus.UPCOMING,
+            description="A completely different event",
+        )
 
         response = api_client.get(LIST_URL, {"search": "Rock"})
         results = response.data["results"]
@@ -252,6 +260,28 @@ class TestEventFiltering:
         assert response.status_code == status.HTTP_200_OK
         assert len(results) == 1
         assert results[0]["name"] == event1.name
+
+    def test_filter_events_by_text_search_in_description(
+        self, api_client, event_factory
+    ):
+        """
+        Test that we can filter events by test search in description.
+        """
+        event1 = event_factory(
+            name="Katamari Event",
+            description="A game event",
+        )
+        _ = event_factory(
+            name="Katamari Pop",
+            description="A music event",
+        )
+
+        response = api_client.get(LIST_URL, {"search": "game"})
+        results = response.data["results"]
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(results) == 1
+        assert results[0]["id"] == event1.id
 
     def test_filter_events_by_ordering(self, api_client, event_factory):
         """
