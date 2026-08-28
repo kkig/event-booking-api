@@ -104,7 +104,7 @@ def test_quantity_exceeds_ticket_type_availability(attendee_client, event_factor
     }
 
     response = attendee_client.post(CREATE_URL, payload, format="json")
-    error_msg = BookingMessages.NOT_ENOUGH_TICKETS
+    error_msg = f"Not enough tickets for: {ticket.name}."
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert error_msg in response.data
 
