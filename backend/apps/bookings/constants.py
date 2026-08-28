@@ -5,3 +5,4 @@ class BookingMessages:
     QUANTITY_EXCEED_CAPACITY = "Booking exceeds event capacity or ticket availability."
     INACTIVE_TICKET_TYPE = "The ticket type is not available."
     NOT_ENOUGH_TICKETS = "Not enough tickets available for the requested ticket type."
+    INVALID_STATUS_TO_CANCEL = "Booking cannot be canceled in its current status."
