@@ -69,6 +69,7 @@ def test_user_cancel_booking(attendee_client, booking_factory):
 
     booking.refresh_from_db()
     assert booking.status == BookingStatus.CANCELLED
+    assert booking.cancelled_at is not None
 
 
 @pytest.mark.django_db
