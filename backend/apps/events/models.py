@@ -29,11 +29,7 @@ class Event(models.Model):
 
     @property
     def total_tickets_sold(self):
-        try:
-            return sum(tt.quantity_sold for tt in self.ticket_types.all())  # type: ignore[attr-defined]
-        except Exception as e:
-            print(f"Error fetching ticket_types: {e}")
-            return 0
+        return sum(ticket_type.quantity_sold for ticket_type in self.ticket_types.all())  # type: ignore[attr-defined]
 
 
 class TicketType(models.Model):

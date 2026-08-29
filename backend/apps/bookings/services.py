@@ -1,5 +1,7 @@
 from django.db import transaction
 from django.db.models import F
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.bookings.constants import BookingMessages
@@ -70,5 +72,47 @@ def create_booking(*, user, event_id, items, ticket_type_ids):
         ticket_type.quantity_available = F("quantity_available") - quantity
         ticket_type.quantity_sold = F("quantity_sold") + quantity
         ticket_type.save(update_fields=["quantity_available", "quantity_sold"])
+
+    return booking
+
+
+@transaction.atomic
+def cancel_booking(*, user, booking_reference):
+    """
+    Cancel a booking atomically.
+    """
+    booking = get_object_or_404(
+        Booking.objects.select_for_update(),
+        user=user,
+        booking_reference=booking_reference,
+    )
+
+    if booking.status != BookingStatus.CONFIRMED:
+        raise ValidationError(BookingMessages.INVALID_STATUS_TO_CANCEL)
+
+    items = list(
+        BookingItem.objects.filter(booking=booking)
+        .select_related("ticket_type")
+        .order_by("ticket_type_id")
+    )
+
+    # Lock inventory rows before restoring quantities.
+    ticket_type_ids = [item.ticket_type.pk for item in items]
+
+    list(
+        TicketType.objects.select_for_update()
+        .filter(pk__in=ticket_type_ids)
+        .order_by("pk")
+    )
+
+    booking.status = BookingStatus.CANCELLED
+    booking.cancelled_at = timezone.now()
+    booking.save(update_fields=["status", "cancelled_at"])
+
+    for item in items:
+        TicketType.objects.filter(pk=item.ticket_type.pk).update(
+            quantity_available=F("quantity_available") + item.quantity,
+            quantity_sold=F("quantity_sold") - item.quantity,
+        )
 
     return booking
