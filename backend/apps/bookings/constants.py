@@ -6,3 +6,4 @@ class BookingMessages:
     INACTIVE_TICKET_TYPE = "The ticket type is not available."
     NOT_ENOUGH_TICKETS = "Not enough tickets available for the requested ticket type."
     INVALID_STATUS_TO_CANCEL = "Booking cannot be canceled in its current status."
+    CANCELLED_SUCCESSFULLY = "Booking cancelled successfully."
