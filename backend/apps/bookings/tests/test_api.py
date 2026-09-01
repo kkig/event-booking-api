@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse_lazy
 from rest_framework import status
 
+from apps.bookings.constants import BookingMessages
 from apps.common.choices import BookingStatus
 
 LIST_URL = reverse_lazy("bookings:my-bookings")
@@ -70,6 +71,20 @@ def test_user_cancel_booking(attendee_client, booking_factory):
     booking.refresh_from_db()
     assert booking.status == BookingStatus.CANCELLED
     assert booking.cancelled_at is not None
+
+
+@pytest.mark.django_db
+def test_user_cannot_cancel_already_cancelled_booking(attendee_client, booking_factory):
+    booking = booking_factory(user=attendee_client.user, status=BookingStatus.CANCELLED)
+
+    url = reverse_lazy(
+        CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
+
+    response = attendee_client.put(url)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert BookingMessages.INVALID_STATUS_TO_CANCEL in response.data
 
 
 @pytest.mark.django_db

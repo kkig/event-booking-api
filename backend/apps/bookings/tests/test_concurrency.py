@@ -2,6 +2,7 @@ import threading
 
 import pytest
 from django.urls import reverse_lazy
+from rest_framework import status
 
 from apps.bookings.models import Booking
 from apps.bookings.tests.utils import api_booking_attempt, threaded_booking
@@ -143,65 +144,72 @@ def test_concurrent_shared_event_capacity(
     assert Booking.objects.count() == 1
 
 
-def test_concurrent_booking_after_cancellation(
-    attendee_factory, booking_factory, ticket_type_factory, event_factory, api_client
+def test_concurrent_cancellation_only_restores_inventory_once(
+    attendee_factory,
+    booking_factory,
+    ticket_type_factory,
+    event_factory,
+    api_client_factory,
 ):
     """
-    When user canceled booking, it should free up tickets
-    and another user can to book the tickets.
+    When two requests try to cancel the same booking simultaneously,
+    only one cancellation should succeed and inventory should be restored once.
     """
     event = event_factory(total_capacity=2)
-    ticket_type = ticket_type_factory(event=event, quantity_available=2)
+    ticket_type = ticket_type_factory(
+        event=event, quantity_available=0, quantity_sold=2
+    )
 
-    user1 = attendee_factory.create()
-    user2 = attendee_factory.create()
-    assert user1 != user2
+    user = attendee_factory.create()
 
-    booking1 = booking_factory(user=user1, event=event, status=BookingStatus.CONFIRMED)
-    booking1.items.create(
+    booking = booking_factory(user=user, event=event, status=BookingStatus.CONFIRMED)
+    booking.items.create(
         ticket_type=ticket_type, quantity=2, price_at_booking=ticket_type.price
     )
-    assert Booking.objects.filter(status=BookingStatus.CONFIRMED).count() == 1
 
-    # Simulate fully booked
-    ticket_type.quantity_available = 0
-    ticket_type.quantity_sold = 2
-    ticket_type.save()
-
-    # Results store
-    results = {}
-
-    def cancel_user1_booking():
-        # Simulate cancellation logic
-        booking1.status = BookingStatus.CANCELLED
-        booking1.save()
-
-        # Restore ticket availability manually here for test
-        ticket_type.refresh_from_db()
-        ticket_type.quantity_available = 2
-        ticket_type.quantity_sold = 0
-        ticket_type.save()
-
-        results["cancel"] = "done"
-
-    cancel_thread = threading.Thread(target=cancel_user1_booking)
-    cancel_thread.start()
-    cancel_thread.join()
-
-    data = {
-        "event_id": event.id,
-        "items": [{"ticket_type_id": ticket_type.id, "quantity": 2}],
-    }
-
-    book_thread = threading.Thread(
-        target=threaded_booking, args=(user2, data, "book", results, api_client)
+    cancel_url = reverse_lazy(
+        "bookings:booking-cancel",
+        kwargs={"booking_reference": booking.booking_reference},
     )
-    book_thread.start()
-    book_thread.join()
 
-    assert results["cancel"] == "done"
-    assert results["book"] == "success"
-    assert Booking.objects.filter(status=BookingStatus.CONFIRMED).count() == 1
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user)
+
+    barrier = threading.Barrier(2)
+    results = []
+
+    def cancel(client):
+        barrier.wait()
+        response = client.put(cancel_url)
+        results.append(response)
+
+    thread1 = threading.Thread(target=cancel, args=(client1,))
+    thread2 = threading.Thread(target=cancel, args=(client2,))
+
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    assert len(results) == 2
+
+    statuses = sorted(response.status_code for response in results)
+
+    assert statuses == [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]
+
+    booking.refresh_from_db()
+    ticket_type.refresh_from_db()
+
+    assert booking.status == BookingStatus.CANCELLED
+    assert booking.cancelled_at is not None
+
+    # Inventory must be restored exactly once.
+    assert ticket_type.quantity_available == 2
+    assert ticket_type.quantity_sold == 0
 
 
 def test_simultaneous_booking_only_one_succeeds(
