@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from rest_framework import status
 
 from apps.bookings.models import Booking
-from apps.bookings.tests.utils import api_booking_attempt, threaded_booking
+from apps.bookings.tests.utils import threaded_booking
 from apps.common.choices import BookingStatus
 
 # Normally django_db use transaction rollback
@@ -21,10 +21,8 @@ def test_concurrent_booking_edge_case(
     event = event_factory(total_capacity=5)
     ticket_type = ticket_type_factory(event=event, quantity_available=5)
 
-    # Create new clients
     user1 = attendee_factory.create()
     user2 = attendee_factory.create()
-    assert user1 != user2
 
     client1 = api_client_factory()
     client1.force_authenticate(user=user1)
@@ -32,33 +30,34 @@ def test_concurrent_booking_edge_case(
     client2 = api_client_factory()
     client2.force_authenticate(user=user2)
 
-    assert client1 != client2
+    data = {
+        "event_id": event.id,
+        "items": [{"ticket_type_id": ticket_type.id, "quantity": 3}],
+    }
 
+    barrier = threading.Barrier(2)
     results = [None, None]
 
-    # Both users try to book 3 tickets (3 + 3 > 5 = should cause one to fail)
-    thread1 = threading.Thread(
-        target=lambda: results.__setitem__(
-            0, api_booking_attempt(client1, event.id, ticket_type.id, 3)
-        ),
-    )
-    thread2 = threading.Thread(
-        target=lambda: results.__setitem__(
-            1, api_booking_attempt(client2, event.id, ticket_type.id, 3)
-        )
-    )
+    def make_booking(client, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
+
+    thread1 = threading.Thread(target=make_booking, args=(client1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, 1))
 
     thread1.start()
     thread2.start()
+
     thread1.join()
     thread2.join()
 
-    # Check: only one success, the other fails
-    successes = [resp for resp in results if resp and resp.status_code == 201]
-    failures = [resp for resp in results if resp and resp.status_code == 400]
+    responses = [resp for resp in results if resp is not None]
 
-    assert len(successes) == 1, "Exactly one booking should succeed."
-    assert len(failures) == 1, "Exactly one booking should fail."
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert "capacity" in failures[0].json()[0].lower()
 
 
