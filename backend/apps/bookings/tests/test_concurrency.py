@@ -114,7 +114,7 @@ def test_concurrent_exact_last_ticket_booking(
 
 
 def test_concurrent_shared_event_capacity(
-    attendee_factory, ticket_type_factory, event_factory, api_client
+    attendee_factory, ticket_type_factory, event_factory, api_client_factory
 ):
     """
     When 2 users try to book for the same event and that will exceed
@@ -125,34 +125,44 @@ def test_concurrent_shared_event_capacity(
     standard = ticket_type_factory(event=event, quantity_available=5, name="Standard")
     vip = ticket_type_factory(event=event, quantity_available=5, name="VIP")
 
-    user1 = attendee_factory()
-    user2 = attendee_factory()
+    user1 = attendee_factory.create()
+    user2 = attendee_factory.create()
+
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user1)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user2)
 
     data1 = {
         "event_id": event.id,
         "items": [{"ticket_type_id": standard.id, "quantity": 3}],
     }
-    data2 = {
-        "event_id": event.id,
-        "items": [{"ticket_type_id": vip.id, "quantity": 3}],
-    }
+    data2 = {"event_id": event.id, "items": [{"ticket_type_id": vip.id, "quantity": 3}]}
 
-    results = {}
+    barrier = threading.Barrier(2)
+    results = [None, None]
 
-    t1 = threading.Thread(
-        target=threaded_booking, args=(user1, data1, "user1", results, api_client)
-    )
-    t2 = threading.Thread(
-        target=threaded_booking, args=(user2, data2, "user2", results, api_client)
-    )
+    def make_booking(client, data, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
 
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    thread1 = threading.Thread(target=make_booking, args=(client1, data1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, data2, 1))
 
-    assert "success" in results.values()
-    assert "failed" in results.values()
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    responses = [resp for resp in results if resp is not None]
+
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert Booking.objects.count() == 1
 
 
