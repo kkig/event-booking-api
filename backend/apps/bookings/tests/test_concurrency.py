@@ -62,7 +62,7 @@ def test_concurrent_booking_edge_case(
 
 
 def test_concurrent_exact_last_ticket_booking(
-    attendee_factory, event_factory, ticket_type_factory, api_client
+    attendee_factory, event_factory, ticket_type_factory, api_client_factory
 ):
     """
     When 2 users try to book the last ticket for the same event,
@@ -75,28 +75,41 @@ def test_concurrent_exact_last_ticket_booking(
 
     user1 = attendee_factory.create()
     user2 = attendee_factory.create()
-    assert user1 != user2
+
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user1)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user2)
 
     data = {
         "event_id": event.id,
         "items": [{"ticket_type_id": ticket_type.id, "quantity": 1}],
     }
 
-    results = {}
+    barrier = threading.Barrier(2)
+    results = [None, None]
 
-    t1 = threading.Thread(
-        target=threaded_booking, args=(user1, data, "user1", results, api_client)
-    )
-    t2 = threading.Thread(
-        target=threaded_booking, args=(user2, data, "user2", results, api_client)
-    )
+    def make_booking(client, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
 
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    thread1 = threading.Thread(target=make_booking, args=(client1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, 1))
 
-    assert sorted(results.values()) == ["failed", "success"]
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    responses = [resp for resp in results if resp is not None]
+
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert Booking.objects.count() == 1
 
 
