@@ -57,7 +57,7 @@ def test_concurrent_booking_edge_case(
 
     assert len(successes) == 1
     assert len(failures) == 1
-    assert "capacity" in failures[0].json()[0].lower()
+    assert "capacity" in failures[0].json()["detail"].lower()
 
 
 def test_concurrent_exact_last_ticket_booking(
