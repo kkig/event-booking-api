@@ -5,7 +5,6 @@ from django.urls import reverse_lazy
 from rest_framework import status
 
 from apps.bookings.models import Booking
-from apps.bookings.tests.utils import api_booking_attempt, threaded_booking
 from apps.common.choices import BookingStatus
 
 # Normally django_db use transaction rollback
@@ -21,10 +20,8 @@ def test_concurrent_booking_edge_case(
     event = event_factory(total_capacity=5)
     ticket_type = ticket_type_factory(event=event, quantity_available=5)
 
-    # Create new clients
     user1 = attendee_factory.create()
     user2 = attendee_factory.create()
-    assert user1 != user2
 
     client1 = api_client_factory()
     client1.force_authenticate(user=user1)
@@ -32,38 +29,39 @@ def test_concurrent_booking_edge_case(
     client2 = api_client_factory()
     client2.force_authenticate(user=user2)
 
-    assert client1 != client2
+    data = {
+        "event_id": event.id,
+        "items": [{"ticket_type_id": ticket_type.id, "quantity": 3}],
+    }
 
+    barrier = threading.Barrier(2)
     results = [None, None]
 
-    # Both users try to book 3 tickets (3 + 3 > 5 = should cause one to fail)
-    thread1 = threading.Thread(
-        target=lambda: results.__setitem__(
-            0, api_booking_attempt(client1, event.id, ticket_type.id, 3)
-        ),
-    )
-    thread2 = threading.Thread(
-        target=lambda: results.__setitem__(
-            1, api_booking_attempt(client2, event.id, ticket_type.id, 3)
-        )
-    )
+    def make_booking(client, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
+
+    thread1 = threading.Thread(target=make_booking, args=(client1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, 1))
 
     thread1.start()
     thread2.start()
+
     thread1.join()
     thread2.join()
 
-    # Check: only one success, the other fails
-    successes = [resp for resp in results if resp and resp.status_code == 201]
-    failures = [resp for resp in results if resp and resp.status_code == 400]
+    responses = [resp for resp in results if resp is not None]
 
-    assert len(successes) == 1, "Exactly one booking should succeed."
-    assert len(failures) == 1, "Exactly one booking should fail."
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert "capacity" in failures[0].json()[0].lower()
 
 
 def test_concurrent_exact_last_ticket_booking(
-    attendee_factory, event_factory, ticket_type_factory, api_client
+    attendee_factory, event_factory, ticket_type_factory, api_client_factory
 ):
     """
     When 2 users try to book the last ticket for the same event,
@@ -76,33 +74,46 @@ def test_concurrent_exact_last_ticket_booking(
 
     user1 = attendee_factory.create()
     user2 = attendee_factory.create()
-    assert user1 != user2
+
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user1)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user2)
 
     data = {
         "event_id": event.id,
         "items": [{"ticket_type_id": ticket_type.id, "quantity": 1}],
     }
 
-    results = {}
+    barrier = threading.Barrier(2)
+    results = [None, None]
 
-    t1 = threading.Thread(
-        target=threaded_booking, args=(user1, data, "user1", results, api_client)
-    )
-    t2 = threading.Thread(
-        target=threaded_booking, args=(user2, data, "user2", results, api_client)
-    )
+    def make_booking(client, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
 
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    thread1 = threading.Thread(target=make_booking, args=(client1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, 1))
 
-    assert sorted(results.values()) == ["failed", "success"]
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    responses = [resp for resp in results if resp is not None]
+
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert Booking.objects.count() == 1
 
 
 def test_concurrent_shared_event_capacity(
-    attendee_factory, ticket_type_factory, event_factory, api_client
+    attendee_factory, ticket_type_factory, event_factory, api_client_factory
 ):
     """
     When 2 users try to book for the same event and that will exceed
@@ -113,34 +124,44 @@ def test_concurrent_shared_event_capacity(
     standard = ticket_type_factory(event=event, quantity_available=5, name="Standard")
     vip = ticket_type_factory(event=event, quantity_available=5, name="VIP")
 
-    user1 = attendee_factory()
-    user2 = attendee_factory()
+    user1 = attendee_factory.create()
+    user2 = attendee_factory.create()
+
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user1)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user2)
 
     data1 = {
         "event_id": event.id,
         "items": [{"ticket_type_id": standard.id, "quantity": 3}],
     }
-    data2 = {
-        "event_id": event.id,
-        "items": [{"ticket_type_id": vip.id, "quantity": 3}],
-    }
+    data2 = {"event_id": event.id, "items": [{"ticket_type_id": vip.id, "quantity": 3}]}
 
-    results = {}
+    barrier = threading.Barrier(2)
+    results = [None, None]
 
-    t1 = threading.Thread(
-        target=threaded_booking, args=(user1, data1, "user1", results, api_client)
-    )
-    t2 = threading.Thread(
-        target=threaded_booking, args=(user2, data2, "user2", results, api_client)
-    )
+    def make_booking(client, data, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
 
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    thread1 = threading.Thread(target=make_booking, args=(client1, data1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, data2, 1))
 
-    assert "success" in results.values()
-    assert "failed" in results.values()
+    thread1.start()
+    thread2.start()
+
+    thread1.join()
+    thread2.join()
+
+    responses = [resp for resp in results if resp is not None]
+
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert Booking.objects.count() == 1
 
 
@@ -213,7 +234,7 @@ def test_concurrent_cancellation_only_restores_inventory_once(
 
 
 def test_simultaneous_booking_only_one_succeeds(
-    attendee_factory, ticket_type_factory, event_factory, api_client
+    attendee_factory, ticket_type_factory, event_factory, api_client_factory
 ):
     """
     Prevent overbooking when 2 users try to book for the same event
@@ -225,24 +246,38 @@ def test_simultaneous_booking_only_one_succeeds(
     user1 = attendee_factory.create()
     user2 = attendee_factory.create()
 
+    client1 = api_client_factory()
+    client1.force_authenticate(user=user1)
+
+    client2 = api_client_factory()
+    client2.force_authenticate(user=user2)
+
     data = {
         "event_id": event.id,
         "items": [{"ticket_type_id": ticket_type.id, "quantity": 2}],
     }
 
-    results = {}
+    barrier = threading.Barrier(2)
+    results = [None, None]
 
-    thread1 = threading.Thread(
-        target=threaded_booking, args=(user1, data, "user1", results, api_client)
-    )
-    thread2 = threading.Thread(
-        target=threaded_booking, args=(user2, data, "user2", results, api_client)
-    )
+    def make_booking(client, index):
+        barrier.wait()
+        results[index] = client.post(CREATE_URL, data, format="json")
+
+    thread1 = threading.Thread(target=make_booking, args=(client1, 0))
+    thread2 = threading.Thread(target=make_booking, args=(client2, 1))
 
     thread1.start()
     thread2.start()
+
     thread1.join()
     thread2.join()
 
-    assert sorted(results.values()) == ["failed", "success"]
+    responses = [resp for resp in results if resp is not None]
+
+    successes = [resp for resp in responses if resp.status_code == 201]
+    failures = [resp for resp in responses if resp.status_code == 400]
+
+    assert len(successes) == 1
+    assert len(failures) == 1
     assert Booking.objects.filter(status=BookingStatus.CONFIRMED).count() == 1

@@ -107,3 +107,33 @@ def test_user_cancel_will_update_ticket_availability(
     ticket_type.refresh_from_db()
     assert ticket_type.quantity_available == 12  # 10 + 2 from booking item
     assert ticket_type.quantity_sold == 3  # 5 - 2 from booking item
+
+
+@pytest.mark.django_db
+def test_user_cancel_restores_inventory_for_multiple_ticket_types(
+    attendee_client, booking_factory, booking_item_factory, ticket_type_factory
+):
+    booking = booking_factory(user=attendee_client.user, status=BookingStatus.CONFIRMED)
+
+    ticket_type_vip = ticket_type_factory(quantity_available=8, quantity_sold=2)
+    ticket_type_standard = ticket_type_factory(quantity_available=5, quantity_sold=5)
+
+    booking_item_factory(booking=booking, ticket_type=ticket_type_vip, quantity=2)
+    booking_item_factory(booking=booking, ticket_type=ticket_type_standard, quantity=3)
+
+    url = reverse_lazy(
+        CANCEL_BASE, kwargs={"booking_reference": booking.booking_reference}
+    )
+
+    response = attendee_client.put(url)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    ticket_type_vip.refresh_from_db()
+    ticket_type_standard.refresh_from_db()
+
+    assert ticket_type_vip.quantity_available == 10
+    assert ticket_type_vip.quantity_sold == 0
+
+    assert ticket_type_standard.quantity_available == 8
+    assert ticket_type_standard.quantity_sold == 2
