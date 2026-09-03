@@ -106,7 +106,7 @@ def test_quantity_exceeds_ticket_type_availability(attendee_client, event_factor
     response = attendee_client.post(CREATE_URL, payload, format="json")
     error_msg = BookingMessages.NOT_ENOUGH_TICKETS
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_msg in response.data
+    assert response.data == {"detail": error_msg}
 
 
 @pytest.mark.django_db
@@ -151,7 +151,7 @@ def test_total_quantity_exceeds_event_capacity(attendee_client, event_factory):
     response = attendee_client.post(CREATE_URL, payload, format="json")
     error_msg = BookingMessages.QUANTITY_EXCEED_CAPACITY
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert error_msg in response.data
+    assert response.data == {"detail": error_msg}
 
 
 @pytest.mark.django_db
@@ -181,3 +181,23 @@ def test_create_calcurate_total_price(attendee_client, event_factory):
 
     booking = Booking.objects.get(booking_reference=reference)
     assert booking.total_price == total_price
+
+
+@pytest.mark.django_db
+def test_booking_returns_detail_for_insufficient_tickets(
+    attendee_client, event_factory
+):
+    event = event_factory(
+        total_capacity=500, with_ticket_types=[{"quantity_available": 2}]
+    )
+    ticket = event.ticket_types.all()[0]
+
+    payload = {
+        "event_id": event.id,
+        "items": [{"ticket_type_id": ticket.id, "quantity": 3}],
+    }
+
+    response = attendee_client.post(CREATE_URL, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == {"detail": BookingMessages.NOT_ENOUGH_TICKETS}

@@ -1,6 +1,7 @@
 from typing import cast
 
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,10 +17,18 @@ class BookingCreateView(APIView):
 
     def post(self, request):
         serializer = BookingSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
             booking = cast(Booking, serializer.save())
+        except ValidationError as exc:
             return Response(
-                {"booking_reference": booking.booking_reference},
-                status=status.HTTP_201_CREATED,
+                {"detail": exc.detail[0]}, status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {"booking_reference": booking.booking_reference},
+            status=status.HTTP_201_CREATED,
+        )
