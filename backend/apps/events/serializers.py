@@ -70,7 +70,22 @@ class TicketTypeSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "event", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "event",
+            "quantity_sold",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_extra_kwargs(self):
+        extra_kwargs = super().get_extra_kwargs()
+
+        if self.instance is not None:
+            # On update, make quantity_available read-only
+            extra_kwargs.setdefault("quantity_available", {})["read_only"] = True
+
+        return extra_kwargs
 
     def validate_name(self, value):
         event = self.context.get("event")
