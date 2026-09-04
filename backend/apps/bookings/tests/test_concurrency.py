@@ -164,6 +164,13 @@ def test_concurrent_shared_event_capacity(
     assert len(failures) == 1
     assert Booking.objects.count() == 1
 
+    standard.refresh_from_db()
+    vip.refresh_from_db()
+
+    assert {standard.quantity_sold, vip.quantity_sold} == {0, 3}
+    assert {standard.quantity_available, vip.quantity_available} == {5, 2}
+    assert event.total_tickets_sold == 3
+
 
 def test_concurrent_cancellation_only_restores_inventory_once(
     attendee_factory,
