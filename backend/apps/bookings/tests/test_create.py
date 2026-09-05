@@ -155,6 +155,36 @@ def test_total_quantity_exceeds_event_capacity(attendee_client, event_factory):
 
 
 @pytest.mark.django_db
+def test_booking_with_inactive_ticket_type(attendee_client, event_factory):
+    event = event_factory(
+        total_capacity=500,
+        with_ticket_types=[
+            {
+                "quantity_available": 20,
+                "quantity_sold": 0,
+                "is_active": False,
+            }
+        ],
+    )
+    ticket = event.ticket_types.all()[0]
+
+    payload = {
+        "event_id": event.id,
+        "items": [{"ticket_type_id": ticket.id, "quantity": 2}],
+    }
+
+    response = attendee_client.post(CREATE_URL, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == {"detail": BookingMessages.INACTIVE_TICKET_TYPE}
+
+    ticket.refresh_from_db()
+    assert ticket.quantity_available == 20
+    assert ticket.quantity_sold == 0
+    assert not Booking.objects.filter(user=attendee_client.user).exists()
+
+
+@pytest.mark.django_db
 def test_create_calcurate_total_price(attendee_client, event_factory):
     event = event_factory(
         total_capacity=500,
