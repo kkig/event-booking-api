@@ -4,61 +4,69 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Lint Checks](https://github.com/kkig/event-booking-api/actions/workflows/ci.yml/badge.svg)
 
-A backend REST API built with Django REST Framework and JWT authentication to manage events, ticket types, and bookings with concurrency-safe logic.
-Designed for multi-ticket bookings, capacity management, and robust concurrency control using database transactions and row-level locking.
+A backend REST API built with Django REST Framework and JWT authentication to manage events, ticket types, and bookings.
+
+The API is designed to maintain ticket inventory and event-capacity consistency under concurrent booking and cancellation requests, using PostgreSQL transactions and row-level locking.
 
 
 ## Features
 
-- 🚀 Handles concurrent booking requests gracefully, preventing race conditions
-- User registration and authentication with role-based permissions
+- User registration and JWT authentication with role-based permissions
 - Create and manage events with capacity limits
-- Define multiple ticket types per event (e.g., Standard, VIP)
-- Booking creation with atomic transactions and pessimistic locking (`select_for_update()`) to prevent overbooking
-- Booking cancellation that releases ticket availability
-- Comprehensive automated tests simulating real-world concurrency scenarios
+- Define multiple ticket types per event
+- Create, view, and cancel bookings
+- Concurrency-safe booking creation using database transactions and row-level locking
+- Event-level capacity enforcement across multiple ticket types
+- Atomic booking cancellation that restores ticket inventory
+- Automated concurrency tests covering competing bookings, shared event capacity, and booking/cancellation races
 
 
 ## Tech Stack
 
 - Python 3.14
-- Django REST Framework
-- uv
+- Django & Django REST Framework
 - PostgreSQL
+- JWT authentication
 - Docker & Docker Compose
+- pytest / pytest-django
+- Ruff
+- GitHub Actions
 
 
 ## Project Structure
-This repository is organized as a monorepo.
 
 ```text
 .
-├── backend/           # Django application
+├── backend/           # Django application and Python dependencies
 ├── docs/              # Project documentation
+├── scripts/           # Development/setup scripts
 ├── .devcontainer/     # Dev Container configuration
-├── scripts           # Scripts
-├── compose.yml        # Base development stack
-├── compose.dev.yml    # Local development stack
-├── compose.prod.yml   # Production stack
-├── Makefile           # Infrastructure commands
-└── README.md
+├── compose.yml        # Base Docker Compose configuration
+├── compose.dev.yml    # Development environment
+├── compose.prod.yml   # Production environment
+├── Makefile           # Common development commands
+├── .env.example
+├── LICENSE
+├── README.md
+└── project.code-workspace
 ```
-
-The Django project and all Python tooling (`pyproject.toml`, `uv.lock`, virtual environment, etc.) live inside the `backend/` directory.
 
 
 ## Getting Started
 
-1. Clone the repository.
-   ```bash
-   git clone https://github.com/kkig/event-booking-api.git
-   cd event-booking-api
-   ```
-2. Create a `.env` file from `.env.example`.
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/kkig/event-booking-api.git
+    cd event-booking-api
+    ```
+2. Create your environment file:
+    ```bash
+    cp .env.example .env
+    ```
 
 Choose one of the following development workflows:
 
-- **Development Container** - quickest way to get started. Automatically configure development environment with required tools.
+- **Development Container** - quickest way to get started with the preconfigured development environment.
 - **Local Development** - install and manage the development environment on your own machine.
 
 For detailed setup instructions, see [Development Guide](docs/development.md).
@@ -66,18 +74,25 @@ For detailed setup instructions, see [Development Guide](docs/development.md).
 
 ## Running the Application
 
-Start the development environment:
-```bash
-make up
-```
-To stop app:
-```bash
-make down
-```
+### Development Container
+
+The development environment is configured automatically when using the Development Container.
 
 The API is available at:
 `http://localhost:8000`
 
+
+### Local Development
+
+Start the development environment:
+```bash
+make up
+```
+
+To stop the application:
+```bash
+make down
+```
 
 ## Documentation
 
@@ -88,29 +103,28 @@ The API is available at:
 ## User Roles
 
 - **Organizer** – Can create and manage events and ticket types.
-- **Attendee** – Can browse events and make/cancel bookings.
+- **Attendee** – Can browse events and create/cancel bookings.
 
 
 ## API Documentation
 
-Interactive API docs are available once the server is running:
+Interactive API documentation is available once the server is running:
 
-| Type           | URL                 | Description                       |
+| Type           | Endpoint            | Description                       |
 | -------------- | ------------------- | --------------------------------- |
 | OpenAPI Schema | `/api/schema`       | Raw OpenAPI schema (JSON)         |
 | Swagger UI     | `/api/docs/swagger` | Interactive Swagger documentation |
 | ReDoc UI       | `/api/docs/redoc`   | Interactive ReDoc documentation   |
 
-> 🔐 To authorize in Swagger UI, click the "Authorize" button and enter your JWT token as:
+> 🔐 To authenticate in Swagger UI, click **Authorize** and enter your JWT token:
 > `Bearer <your-token>`
 
 
 ## Future Improvements
 
-- Implement email notifications for booking confirmation and cancellation
-- Add rate limiting to prevent abuse
-- Enhance error response standardization
-- Expand user role management (organizer vs attendee)
+- Add asynchronous email notifications for booking confirmation and cancellation
+- Add API rate limiting and caching for high-traffic endpoints
+- Expand the API with payment processing and a full booking/payment lifecycle
 
 
 ## License
