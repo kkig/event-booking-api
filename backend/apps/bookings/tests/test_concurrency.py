@@ -238,3 +238,85 @@ def test_concurrent_cancellation_only_restores_inventory_once(
     # Inventory must be restored exactly once.
     assert ticket_type.quantity_available == 2
     assert ticket_type.quantity_sold == 0
+
+
+def test_concurrent_booking_and_cancellation_same_ticket_type(
+    attendee_factory,
+    booking_factory,
+    ticket_type_factory,
+    event_factory,
+    api_client_factory,
+):
+    event = event_factory(total_capacity=2)
+    ticket_type = ticket_type_factory(
+        event=event, quantity_available=1, quantity_sold=1
+    )
+
+    cancellation_user = attendee_factory.create()
+    booking_user = attendee_factory.create()
+
+    existing_booking = booking_factory(
+        user=cancellation_user, event=event, status=BookingStatus.CONFIRMED
+    )
+    existing_booking.items.create(
+        ticket_type=ticket_type, quantity=1, price_at_booking=ticket_type.price
+    )
+
+    cancel_url = reverse_lazy(
+        "bookings:booking-cancel",
+        kwargs={"booking_reference": existing_booking.booking_reference},
+    )
+
+    booking_data = {
+        "event_id": event.id,
+        "items": [{"ticket_type_id": ticket_type.id, "quantity": 2}],
+    }
+
+    cancellation_client = api_client_factory()
+    cancellation_client.force_authenticate(user=cancellation_user)
+
+    booking_client = api_client_factory()
+    booking_client.force_authenticate(user=booking_user)
+
+    barrier = threading.Barrier(2)
+    results = {}
+
+    def cancel():
+        barrier.wait()
+        results["cancellation"] = cancellation_client.put(cancel_url)
+
+    def make_booking():
+        barrier.wait()
+        results["booking"] = booking_client.post(
+            CREATE_URL,
+            booking_data,
+            format="json",
+        )
+
+    cancellation_thread = threading.Thread(target=cancel)
+    booking_thread = threading.Thread(target=make_booking)
+
+    cancellation_thread.start()
+    booking_thread.start()
+
+    cancellation_thread.join()
+    booking_thread.join()
+
+    assert len(results) == 2
+
+    cancellation_result = results["cancellation"]
+    booking_result = results["booking"]
+
+    assert cancellation_result.status_code == status.HTTP_200_OK
+    assert booking_result.status_code in {
+        status.HTTP_201_CREATED,
+        status.HTTP_400_BAD_REQUEST,
+    }
+
+    existing_booking.refresh_from_db()
+    ticket_type.refresh_from_db()
+
+    assert existing_booking.status == BookingStatus.CANCELLED
+    assert existing_booking.cancelled_at is not None
+
+    assert ticket_type.quantity_available + ticket_type.quantity_sold == 2
