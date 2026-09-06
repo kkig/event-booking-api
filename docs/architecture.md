@@ -20,9 +20,9 @@ sequenceDiagram
 
     A->>C: POST /api/bookings/
     C->>C: Begin transaction.atomic()
-    C->>D: SELECT TicketType FOR UPDATE
-    C->>D: SELECT Event FOR UPDATE
-    C->>D: Check availability & capacity
+    C->>D: Lock Event
+    C->>D: Lock TicketTypes (ordered by ID)
+    C->>D: Check event capacity & ticket availability
 
     alt Tickets Available
         C->>D: Create Booking
@@ -48,15 +48,16 @@ sequenceDiagram
     participant C as API Server
     participant D as Database
 
-    A->>C: PUT /api/bookings/:id/
-    C->>C: Check auth and ownership
+    A->>C: PUT /api/bookings/{booking_reference}/cancel
     C->>D: Begin transaction.atomic()
-    C->>D: Lock Booking (SELECT ... FOR UPDATE)
+    C->>D: Lock Booking
     C->>D: Check Booking status
+    C->>D: Lock TicketTypes (ordered by ID)
     alt Already cancelled
-        C-->>A: 400 Bad Request (already cancelled)
+        C-->>A: 400 Bad Request (invalid status to cancel)
     else Valid cancellation
         C->>D: Update Booking status to CANCELLED
+        C->>D: Update booking.cancelled_at to timezone.now()
         C->>D: Increment TicketType.quantity_available
         C->>D: Decrement TicketType.quantity_sold
         C->>D: Commit transaction
@@ -68,7 +69,7 @@ sequenceDiagram
 
 ## Concurrency Test Suite
 
-A key aspect of this API is its robust handling of concurrent booking requests. The test suite includes specific tests designed to validate the system's behavior under high-stress, simultaneous interactions.
+A key aspect of this API is its robust handling of concurrent booking requests. The test suite includes specific tests designed to validate the system's behavior under concurrent interactions.
 
 These tests utilize Python's `threading` module within Pytest to simulate multiple users attempting to book tickets concurrently. They ensure that:
 
@@ -77,5 +78,6 @@ These tests utilize Python's `threading` module within Pytest to simulate multip
 - **Shared Capacity Management:** Tests cover situations where different ticket types contribute to a single event's overall capacity, ensuring accurate availability updates across types.
 - **Atomic Operations:** Verifies that critical operations (booking creation, quantity updates, cancellations) are atomic and concurrency-safe, leveraging PostgreSQL's row-level locking (`select_for_update()`) and Django's `transaction.atomic()` blocks.
 - **Cancellation Releasing Tickets:** Confirms that cancelling a booking correctly frees up ticket availability for other users to book immediately.
+- **Booking & Cancellation Race:** Verifies that a booking and cancellation involving the same ticket type maintain consistent inventory when executed concurrently.
 
 These dedicated concurrency tests provide strong confidence in the API's reliability under real-world usage patterns.
