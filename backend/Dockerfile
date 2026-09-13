@@ -85,11 +85,11 @@ ARG USER_GID=$USER_UID
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd \
-        --uid $USER_UID \
-        --gid $USER_GID \
-        --create-home \
-        --shell /bin/bash \
-        $USERNAME
+    --uid $USER_UID \
+    --gid $USER_GID \
+    --create-home \
+    --shell /bin/bash \
+    $USERNAME
 
 # Ensure commands compile to bytecode for faster startup in production. (Optional)
 ENV UV_COMPILE_BYTECODE=1
@@ -105,6 +105,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Copy application source code.
 COPY ./backend .
+
+USER nonroot
 
 EXPOSE 8000
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
