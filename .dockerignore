@@ -1,7 +1,7 @@
 # Git
-.git
+.git/
 .gitignore
-.github
+.github/
 .gitlab-ci.yml
 
 # IDE
@@ -19,7 +19,7 @@ dist
 build
 
 # Virtual environment
-.venv
+backend/.venv/
 
 # Python cache and compiled files
 **/__pycache__/
