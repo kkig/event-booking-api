@@ -9,11 +9,6 @@ services:
     volumes:
       - .:/workspace
 
-    environment:
-      # Devcontainer settings
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-
     command: >
       uv run python manage.py runserver 0.0.0.0:8000
 
