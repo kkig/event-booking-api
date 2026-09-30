@@ -7,7 +7,7 @@ WEB=web
 
 # Tells Make to always run the specified targes,
 # even if folders/files with the same name exist in the root directory.
-.PHONY: up up-detach down build rebuild db
+.PHONY: up up-detach down build rebuild db db-detach db-down
 
 
 # Start all services (foreground)
