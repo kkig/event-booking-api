@@ -7,60 +7,60 @@ WEB=web
 
 # Tells Make to always run the specified targes,
 # even if folders/files with the same name exist in the root directory.
-.PHONY: up up-detach down build rebuild db
+.PHONY: \
+	up up-detach down build rebuild \
+	prod-up prod-down prod-build \
+	db db-detach db-down
+
+DEV_PROJECT := event-booking-dev
+PROD_PROJECT := event-booking-prod
+
+DEV_COMPOSE := docker compose -p $(DEV_PROJECT) -f compose.yml -f compose.dev.yml
+PROD_COMPOSE := docker compose -p $(PROD_PROJECT) -f compose.yml -f compose.prod.yml
 
 
-# Start all services (foreground)
+# Start all dev services (foreground)
 up:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	up --build
+	$(DEV_COMPOSE) up --build
 
-# Start all services (detached mode)
+# Start all dev services (detached mode)
 up-detach:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	up --build -d
+	$(DEV_COMPOSE) up --build -d
 
-# Stop all services and remove containers
+# Stop all dev services and remove containers
 down:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	down
+	$(DEV_COMPOSE) down
 
-# Build all containers
+# Build all dev containers
 build:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	build
+	$(DEV_COMPOSE) build
 
-# Rebuild containers from scratch (no cache)
+# Rebuild dev containers from scratch (no cache)
 rebuild:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	build --no-cache
+	$(DEV_COMPOSE) build --no-cache
+
+
+# Start all prod services (detached mode)
+prod-up:
+	$(PROD_COMPOSE) up -d
+
+# Start all prod services and remove containers
+prod-down:
+	$(PROD_COMPOSE) down
+
+# Build prod web container
+prod-build:
+	$(PROD_COMPOSE) build web
+
 
 # Run db container only (foreground)
 db:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	up db
+	$(DEV_COMPOSE) up db
 
 # Run db container only (detached mode)
 db-detach:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	up -d db
+	$(DEV_COMPOSE) up -d db
 
+# Stop db container only
 db-down:
-	docker compose \
-		-f compose.yml \
-		-f compose.dev.yml \
-	down db
+	$(DEV_COMPOSE) stop db
