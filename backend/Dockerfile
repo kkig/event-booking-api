@@ -12,14 +12,6 @@ ENV PYTHONUNBUFFERED=1
 # Use cache mounts to improve performance of uv installs.
 ENV UV_LINK_MODE=copy
 
-
-# Install required system dependencies.
-# Clean up apt lists to reduce image size.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 # Set working directory.
 WORKDIR /workspace/backend
 
@@ -37,7 +29,11 @@ FROM base AS development
 
 ENV UV_PYTHON_PREFERENCE=managed
 
+# Install required system dependencies.
+# Clean up apt lists to reduce image size.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
     git \
     openssh-client \
     curl \
@@ -99,9 +95,20 @@ ENV UV_PYTHON_PREFERENCE=system
 # Set path for gunicorn to find the virtual environment
 ENV PATH="/workspace/backend/.venv/bin:$PATH"
 
-# Install ONLY production dependencies (--no-dev).
+# Install the system dependencies needed to build the Python dependencies.
+# Keep libpq5 for the PostgreSQL client library required at runtime.
+# Remove build-only packages after uv sync to keep the production image small.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        libpq5 \
+    && apt-mark manual libpq5 \
+    && uv sync --frozen --no-dev --no-install-project \
+    && apt-get purge -y build-essential libpq-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy application source code.
 COPY ./backend .
