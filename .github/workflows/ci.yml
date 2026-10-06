@@ -8,7 +8,7 @@ on:
 
 # Cancels duplicate workflow runs for the same ref and workflow name.
 concurrency:
-  group: "{{ github.workflow }}-{{ github.ref }}"
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -17,14 +17,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v10.2.0
         with:
-          # Automatically caches uv's virtual environments
+          # Cache uv downloads and build artifacts between workflow runs.
           enable-cache: true
-          version: "0.11.27"
+          version: "0.12.23"
 
       - name: Set up Python
         run: uv python install
