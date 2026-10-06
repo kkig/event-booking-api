@@ -1,7 +1,7 @@
 # ------------------------------------------------------------
 # Base Stage: Installs UV and Dependencies
 # ------------------------------------------------------------
-FROM python:3.14-slim AS base
+FROM python:3.14.8-slim AS base
 
 # Avoid writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -16,7 +16,7 @@ ENV UV_LINK_MODE=copy
 WORKDIR /workspace/backend
 
 # Install uv from the official image.
-COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.23 /uv /uvx /bin/
 
 # Copy only the dependency files first to leverage Docker caching.
 COPY ./backend/pyproject.toml ./backend/uv.lock ./
