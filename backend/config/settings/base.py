@@ -194,3 +194,27 @@ SIMPLE_JWT = {
     "TOKEN_SLIDE_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "TOKEN_UNDEFINED_ERROR_CODE": 400,
 }
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        }
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        }
+    },
+}
