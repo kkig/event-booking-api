@@ -1,6 +1,6 @@
 # Event Ticketing / Booking API
 
-![Python](https://img.shields.io/badge/python-3.14-blue)
+![Python](https://img.shields.io/badge/python-3.14.8-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Lint Checks](https://github.com/kkig/event-booking-api/actions/workflows/ci.yml/badge.svg)
 
@@ -23,7 +23,7 @@ The API is designed to maintain ticket inventory and event-capacity consistency 
 
 ## Tech Stack
 
-- Python 3.14
+- Python 3.14.8
 - Django & Django REST Framework
 - PostgreSQL
 - JWT authentication
