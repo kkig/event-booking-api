@@ -56,7 +56,7 @@ prod-migrate:
 prod-up:
 	$(PROD_COMPOSE) up -d
 
-# Start all prod services and remove containers
+# Stop all prod services and remove containers
 prod-down:
 	$(PROD_COMPOSE) down
 

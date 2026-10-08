@@ -94,6 +94,32 @@ To stop the application:
 make down
 ```
 
+### Local Production Verification
+
+To build production web image:
+```bash
+make prod-build
+```
+
+To run production database migrations:
+```bash
+make prod-migrate
+```
+
+To start all production services:
+```bash
+make prod-up
+```
+
+The production verification API is available at:
+`https://localhost:8001`
+
+To stop all production services:
+```bash
+make prod-down
+```
+
+
 ## Documentation
 
 - [Development Guide](docs/development.md)
