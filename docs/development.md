@@ -20,7 +20,7 @@ Using consistent tool versions across environments helps make development and CI
 
 Choose either the Development Container or Local Development workflow.
 
-The Makefile's development commands uses the `event-booking-dev` Docker Compose project. The development database is exposed on host port `5433` to avoid conflicting with a locally installed PostgreSQL instance.
+The development environment uses the `event-booking-dev` Docker Compose project. The development database is exposed on host port `5433` to avoid conflicting with a locally installed PostgreSQL instance.
 
 Running `scripts/bootstrap.sh` prepares the backend development environment by:
 - Running `uv sync --frozen` to create or update `backend/.venv` and install the locked dependencies.
@@ -98,7 +98,7 @@ In this workflow, Django runs on the host machine, while PostgreSQL runs in a Do
     make db-detach
 
     # Alternatively, without make command
-    docker compose -p event-booking-dev \
+    docker compose \
         -f compose.yml \
         -f compose.dev.yml \
         up -d db
