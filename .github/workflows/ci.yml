@@ -27,10 +27,13 @@ jobs:
           version: "0.12.23"
 
       - name: Set up Python
+        working-directory: ./backend
         run: uv python install
 
       - name: Install dependencies
-        run: uv sync --project backend --frozen --dev
+        working-directory: ./backend
+        run: uv sync --frozen --dev
 
       - name: Run pre-commit hooks
+        # Run from the root of the repo
         run: uv run --project backend --frozen pre-commit run --all-files
