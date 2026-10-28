@@ -166,13 +166,13 @@ make prod-up
 
 Git hooks are installed automatically during environment setup using `scripts/bootstrap.sh`.
 
-Run the following commands from the `backend` directory to invoke the hooks manually:
+Run the following commands from the **repository root** to invoke the hooks manually:
 ```bash
 # Run pre-commit hooks
-uv run pre-commit run --all-files
+uv run --project backend --frozen pre-commit run --all-files
 
 # Run pre-push hooks
-uv run pre-commit run --hook-stage pre-push --all-files
+uv run --project backend --frozen pre-commit run --hook-stage pre-push --all-files
 ```
 
 
