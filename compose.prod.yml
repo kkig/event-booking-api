@@ -1,3 +1,5 @@
+name: event-booking-prod
+
 services:
   web:
     build:

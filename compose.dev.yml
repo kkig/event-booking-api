@@ -1,3 +1,5 @@
+name: event-booking-dev
+
 services:
   web:
     build:

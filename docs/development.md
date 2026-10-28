@@ -20,7 +20,7 @@ Using consistent tool versions across environments helps make development and CI
 
 Choose either the Development Container or Local Development workflow.
 
-The Makefile's development commands uses the `event-booking-dev` Docker Compose project. The development database is exposed on host port `5433` to avoid conflicting with a locally installed PostgreSQL instance.
+The development environment uses the `event-booking-dev` Docker Compose project. The development database is exposed on host port `5433` to avoid conflicting with a locally installed PostgreSQL instance.
 
 Running `scripts/bootstrap.sh` prepares the backend development environment by:
 - Running `uv sync --frozen` to create or update `backend/.venv` and install the locked dependencies.
@@ -98,7 +98,7 @@ In this workflow, Django runs on the host machine, while PostgreSQL runs in a Do
     make db-detach
 
     # Alternatively, without make command
-    docker compose -p event-booking-dev \
+    docker compose \
         -f compose.yml \
         -f compose.dev.yml \
         up -d db
@@ -139,7 +139,7 @@ Use `make up` when you want the application and database running in Docker. Use 
 
 ## Local Production Verification
 
-The repository includes a production-oriented Compose configuration for testing the production image locally. The Makefile's production commands use the `event-booking-prod` Docker Compose project, with `web` and `db` containers. It can coexist with the development environment.
+The repository includes a production-oriented Compose configuration for testing the production image locally. The production environment use the `event-booking-prod` Docker Compose project, with `web` and `db` containers. It can coexist with the development environment.
 
 This configuration is intended for local verification and testing of the production container setup. It is **not a public deployment configuration**.
 
@@ -166,13 +166,13 @@ make prod-up
 
 Git hooks are installed automatically during environment setup using `scripts/bootstrap.sh`.
 
-Run the following commands from the `backend` directory to invoke the hooks manually:
+Run the following commands from the **repository root** to invoke the hooks manually:
 ```bash
 # Run pre-commit hooks
-uv run pre-commit run --all-files
+uv run --project backend --frozen pre-commit run --all-files
 
 # Run pre-push hooks
-uv run pre-commit run --hook-stage pre-push --all-files
+uv run --project backend --frozen pre-commit run --hook-stage pre-push --all-files
 ```
 
 
