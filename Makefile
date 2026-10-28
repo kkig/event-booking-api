@@ -12,10 +12,9 @@ WEB=web
 	prod-up prod-down prod-build prod-rebuild prod-migrate \
 	db db-detach db-down
 
-PROD_PROJECT := event-booking-prod
 
 DEV_COMPOSE := docker compose -f compose.yml -f compose.dev.yml
-PROD_COMPOSE := docker compose -p $(PROD_PROJECT) -f compose.yml -f compose.prod.yml
+PROD_COMPOSE := docker compose -f compose.yml -f compose.prod.yml
 
 
 # Build all dev containers

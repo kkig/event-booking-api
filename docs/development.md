@@ -139,7 +139,7 @@ Use `make up` when you want the application and database running in Docker. Use 
 
 ## Local Production Verification
 
-The repository includes a production-oriented Compose configuration for testing the production image locally. The Makefile's production commands use the `event-booking-prod` Docker Compose project, with `web` and `db` containers. It can coexist with the development environment.
+The repository includes a production-oriented Compose configuration for testing the production image locally. The production environment use the `event-booking-prod` Docker Compose project, with `web` and `db` containers. It can coexist with the development environment.
 
 This configuration is intended for local verification and testing of the production container setup. It is **not a public deployment configuration**.
 
