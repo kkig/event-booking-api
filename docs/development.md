@@ -9,7 +9,7 @@ This guide covers environment setup, common development tasks, and local product
     - **Development and CI:** Use uv-managed Python at the version pinned in `backend/.python-version`.
     - **Production:** Uses the Python interpreter supplied by the base image in `backend/Dockerfile`.
 - **Python dependencies:** Locked in `backend/uv.lock`.
-- **uv version:** Pinned to `0.12.23` in the Dockerfile and GitHub Actions. Using the same version locally is recommended for consistency.
+- **uv version:** Pinned to `0.13.6` in the Dockerfile and GitHub Actions. Using the same version locally is recommended for consistency.
 - **PostgreSQL version:** Pinned in `compose.yml` and the GitHub Actions test workflow.
 - **Environment configuration:** Copy `.env.example` to `.env` and configure the required values for your environment.
 
