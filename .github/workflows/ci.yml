@@ -24,7 +24,7 @@ jobs:
         with:
           # Cache uv downloads and build artifacts between workflow runs.
           enable-cache: true
-          version: "0.13.6"
+          version: "0.13.7"
 
       - name: Set up Python
         working-directory: ./backend
