@@ -6,10 +6,13 @@
   ],
   "timezone": "Asia/Tokyo",
   "schedule": [
-    "before 8am on monday"
+    "* 0-7 1 * *"
   ],
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "schedule": [
+      "* 0-7 1 * *"
+    ]
   },
   "packageRules": [
     {
